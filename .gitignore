@@ -1,0 +1,8 @@
+*.hex
+*.jpg
+*.raw
+*.rom
+mist/*
+mister/*
+sidi/*
+
