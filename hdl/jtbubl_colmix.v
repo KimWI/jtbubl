@@ -48,7 +48,7 @@ wire        pal1_we = pal_cs & ~cpu_rnw &  cpu_addr[0];
 
 assign { red, green, blue } = col_out;
 
-jtframe_dual_ram #(.aw(11)) u_ram0(
+jtframe_dual_ram #(.aw(11),.simfile("pal_even.hex")) u_ram0(
     .clk0   ( clk24     ),
     .clk1   ( clk       ),
     // Port 0
@@ -63,7 +63,7 @@ jtframe_dual_ram #(.aw(11)) u_ram0(
     .q1     ( col0_data )
 );
 
-jtframe_dual_ram #(.aw(11)) u_ram1(
+jtframe_dual_ram #(.aw(11),.simfile("pal_odd.hex")) u_ram1(
     .clk0   ( clk24     ),
     .clk1   ( clk       ),
     // Port 0

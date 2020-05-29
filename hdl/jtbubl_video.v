@@ -48,19 +48,14 @@ module jtbubl_video(
     input               cpu_cen,
     input      [12:0]   cpu_addr,
     input      [ 7:0]   cpu_dout,
-    /*
-    output     [ 7:0]   gfx1_dout,
-    output     [ 7:0]   gfx2_dout,
-    output              cpu_irqn,
+    input               vram_cs,
+    output     [ 7:0]   vram_dout,
+    //output              cpu_irqn,
     // SDRAM interface
-    output     [17:0]   gfx1_addr,
-    input      [15:0]   gfx1_data,
-    input               gfx1_ok,
-    output              gfx1_cs,
-    output     [17:0]   gfx2_addr,
-    input      [15:0]   gfx2_data,
-    input               gfx2_ok,
-    output              gfx2_cs,*/
+    output     [17:0]   gfx_addr,
+    input      [15:0]   gfx_data,
+    input               gfx_ok,
+    output              gfx_cs,
     // Colours
     output     [ 3:0]   red,
     output     [ 3:0]   green,
@@ -69,7 +64,8 @@ module jtbubl_video(
     input      [ 3:0]   gfx_en
 );
 
-wire [8:0] vrender, vrender1, vdump, hdump;
+wire [ 8:0] vrender, vrender1, vdump, hdump;
+wire [12:0] col_addr;
 
 jtframe_cen48 u_cen(
     .clk        ( clk       ),    // 48 MHz
@@ -110,14 +106,45 @@ u_timer(
     .VS         ( VS            )
 );
 
+jtbubl_gfx u_gfx(
+    .clk        ( clk            ),
+    .clk24      ( clk24          ),
+    .pxl_cen    ( pxl_cen        ),
+    .pxl2_cen   ( pxl2_cen       ),
+    // PROMs
+    .prog_addr  ( prog_addr      ),
+    .prog_data  ( prog_data      ),
+    .prom_we    ( prom_we        ),
+    // Screen
+    .LHBL       ( LHBL           ),
+    .LVBL       ( LVBL           ),
+    // CPU interface
+    .vram_cs    ( vram_cs        ),
+    .vram_dout  ( vram_dout      ),
+    .cpu_addr   ( cpu_addr[10:0] ),
+    .cpu_rnw    ( cpu_rnw        ),
+    .cpu_dout   ( cpu_dout       ),
+    // SDRAM
+    .gfx_addr   ( gfx_addr       ),
+    .gfx_data   ( gfx_data       ),
+    .gfx_ok     ( gfx_ok         ),
+    .gfx_cs     ( gfx_cs         ),
+    // Color address to palette
+    .col_addr   ( col_addr       )
+);
+
+
 jtbubl_colmix u_colmix(
     .clk        ( clk            ),
+    .clk24      ( clk24          ),
     .pxl_cen    ( pxl_cen        ),
     // Screen
     .LHBL       ( LHBL           ),
     .LVBL       ( LVBL           ),
     .LHBL_dly   ( LHBL_dly       ),
     .LVBL_dly   ( LVBL_dly       ),
+    // Color address to palette
+    .col_addr   ( col_addr       ),
     // CPU interface
     .cpu_addr   ( cpu_addr[10:0] ),
     .cpu_rnw    ( cpu_rnw        ),
