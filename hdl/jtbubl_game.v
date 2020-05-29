@@ -22,9 +22,9 @@ module jtbubl_game(
     input           clk24,
     output          pxl2_cen,   // 12   MHz
     output          pxl_cen,    //  6   MHz
-    output   [4:0]  red,
-    output   [4:0]  green,
-    output   [4:0]  blue,
+    output   [3:0]  red,
+    output   [3:0]  green,
+    output   [3:0]  blue,
     output          LHBL_dly,
     output          LVBL_dly,
     output          HS,
@@ -61,8 +61,7 @@ module jtbubl_game(
     input           dip_test,
     input   [ 1:0]  dip_fxlevel, // Not a DIP on the original PCB   
     // Sound output
-    output  signed [15:0] snd_left,
-    output  signed [15:0] snd_right,
+    output  signed [15:0] snd,
     output          sample,
     input           enable_psg,
     input           enable_fm,
@@ -85,8 +84,7 @@ wire [ 7:0] dipsw_a, dipsw_b;
 wire        LHBL, LVBL;
 
 wire [12:0] cpu_addr;
-wire        gfx_irqn, gfx_cs,  pal_cs;
-wire        gfx_vram_cs;
+wire        vram_cs,  pal_cs;
 wire        cpu_cen, cpu_rnw, cpu_irqn;
 wire [ 7:0] gfx_dout, pal_dout, cpu_dout;
 
@@ -94,8 +92,11 @@ assign prog_rd    = 0;
 assign dwnld_busy = downloading;
 assign { dipsw_b, dipsw_a } = dipsw[19:0];
 
-localparam SND_OFFSET  = 22'h2_0000 >> 1;
-localparam GFX_OFFSET = SND_OFFSET  + (22'h0_8000 >> 1);
+localparam [24:0] SUB_OFFSET = 25'h2_8000 >> 1;
+localparam [24:0] SND_OFFSET = 25'h3_0000 >> 1;
+localparam [24:0] MCU_OFFSET = 25'h3_8000 >> 1;
+localparam [24:0] GFX_OFFSET = 25'h4_0000 >> 1;
+localparam [24:0] PROM_START = 25'hC_0000;
 
 jtframe_cen24 u_cen(
     .clk        ( clk24         ),    // 24 MHz
@@ -113,7 +114,7 @@ jtframe_cen24 u_cen(
     .cen1p5b    (               )
 );
 
-jtframe_dwnld #(.PROM_START(25'h128_000))
+jtframe_dwnld #(.PROM_START(PROM_START))
 u_dwnld(
     .clk            ( clk           ),
     .downloading    ( downloading   ),
@@ -128,22 +129,6 @@ u_dwnld(
     .sdram_ack      ( sdram_ack     )
 );
 
-`ifdef GFX_ONLY
-jtbubl_simloader u_simloader(
-    .rst            ( rst           ),
-    .clk            ( clk24         ),
-    .cpu_cen        ( cpu_cen       ),
-    // GFX
-    .cpu_addr       ( cpu_addr      ),
-    .cpu_dout       ( cpu_dout      ),
-    .cpu_rnw        ( cpu_rnw       ),
-    .gfx_vram_cs   ( gfx_vram_cs  ),
-    .gfx2_vram_cs   ( gfx2_vram_cs  ),
-    .gfx_cfg_cs    ( gfx_cfg_cs   ),
-    .gfx2_cfg_cs    ( gfx2_cfg_cs   ),
-    .pal_cs         ( pal_cs        )
-);
-`else
 `ifndef NOMAIN
 jtbubl_main u_main(
     .clk            ( clk24         ),        // 24 MHz
@@ -169,9 +154,9 @@ jtbubl_main u_main(
     .cpu_dout       ( cpu_dout      ),
     .cpu_rnw        ( cpu_rnw       ),
     .gfx_irqn       ( cpu_irqn      ),
-    .gfx_vram_cs   ( gfx_vram_cs  ),
+    .gfx_vram_cs    ( gfx_vram_cs   ),
     .gfx2_vram_cs   ( gfx2_vram_cs  ),
-    .gfx_cfg_cs    ( gfx_cfg_cs   ),
+    .gfx_cfg_cs     ( gfx_cfg_cs    ),
     .gfx2_cfg_cs    ( gfx2_cfg_cs   ),
     .pal_cs         ( pal_cs        ),
 
@@ -183,7 +168,6 @@ jtbubl_main u_main(
     .dipsw_a        ( dipsw_a       ),
     .dipsw_b        ( dipsw_b       )
 );
-`endif
 `endif
 
 jtbubl_video u_video(
@@ -205,6 +189,7 @@ jtbubl_video u_video(
     .prom_we        ( prom_we       ),
     .prog_addr      ( prog_addr[7:0]),
     .prog_data      ( prog_data[3:0]),
+    /*
     // GFX - CPU interface
     .cpu_irqn       ( cpu_irqn      ),
     .vram_cs        ( vram_cs       ),
@@ -223,7 +208,7 @@ jtbubl_video u_video(
     // pixels
     .red            ( red           ),
     .green          ( green         ),
-    .blue           ( blue          ),
+    .blue           ( blue          ),*/
     // Test
     .gfx_en         ( gfx_en        )
 );
@@ -259,6 +244,14 @@ jtframe_rom #(
     .SLOT0_AW    ( 17              ),
     .SLOT0_DW    (  8              ),
     .SLOT0_OFFSET(  0              ), // Main
+
+    .SLOT0_AW    ( 17              ),
+    .SLOT0_DW    (  8              ),
+    .SLOT0_OFFSET(  SUB_OFFSET     ), // Sub
+
+    .SLOT0_AW    ( 17              ),
+    .SLOT0_DW    (  8              ),
+    .SLOT0_OFFSET(  MCU_OFFSET     ), // MCU
 
     .SLOT3_AW    ( 15              ), // Sound
     .SLOT3_DW    (  8              ),
