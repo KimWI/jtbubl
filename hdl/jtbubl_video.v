@@ -14,7 +14,7 @@
 
     Author: Jose Tejada Gomez. Twitter: @topapate
     Version: 1.0
-    Date: 02-05-2020 */
+    Date: 29-05-2020 */
 
 module jtbubl_video(
     input               rst,
@@ -41,14 +41,16 @@ module jtbubl_video(
     input               gfx2_vram_cs,
     input               gfx1_cfg_cs,
     input               gfx2_cfg_cs,
+    */
     input               pal_cs,
+    output     [ 7:0]   pal_dout,
     input               cpu_rnw,
     input               cpu_cen,
     input      [12:0]   cpu_addr,
     input      [ 7:0]   cpu_dout,
+    /*
     output     [ 7:0]   gfx1_dout,
     output     [ 7:0]   gfx2_dout,
-    output     [ 7:0]   pal_dout,
     output              cpu_irqn,
     // SDRAM interface
     output     [17:0]   gfx1_addr,
@@ -58,11 +60,11 @@ module jtbubl_video(
     output     [17:0]   gfx2_addr,
     input      [15:0]   gfx2_data,
     input               gfx2_ok,
-    output              gfx2_cs,
+    output              gfx2_cs,*/
     // Colours
-    output     [ 4:0]   red,
-    output     [ 4:0]   green,
-    output     [ 4:0]   blue,*/
+    output     [ 3:0]   red,
+    output     [ 3:0]   green,
+    output     [ 3:0]   blue,
     // Test
     input      [ 3:0]   gfx_en
 );
@@ -106,6 +108,25 @@ u_timer(
     .LVBL       ( LVBL          ),
     .HS         ( HS            ),
     .VS         ( VS            )
+);
+
+jtbubl_colmix u_colmix(
+    .clk        ( clk            ),
+    .pxl_cen    ( pxl_cen        ),
+    // Screen
+    .LHBL       ( LHBL           ),
+    .LVBL       ( LVBL           ),
+    .LHBL_dly   ( LHBL_dly       ),
+    .LVBL_dly   ( LVBL_dly       ),
+    // CPU interface
+    .cpu_addr   ( cpu_addr[10:0] ),
+    .cpu_rnw    ( cpu_rnw        ),
+    .cpu_dout   ( cpu_dout       ),
+    .pal_cs     ( pal_cs         ),
+    .pal_dout   ( pal_dout       ),
+    .red        ( red            ),
+    .green      ( green          ),
+    .blue       ( blue           )    
 );
 
 endmodule
