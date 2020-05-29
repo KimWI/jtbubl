@@ -1,3 +1,6 @@
 [submodule "modules/jtframe"]
 	path = modules/jtframe
 	url = https://github.com/jotego/jtframe
+[submodule "modules/jt12"]
+	path = modules/jt12
+	url = https://github.com/jotego/jt12
