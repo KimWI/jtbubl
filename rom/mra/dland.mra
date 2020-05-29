@@ -23,31 +23,47 @@
     <about author="jotego" webpage="https://patreon.com/topapate" source="https://github.com/jotego/jtbubl" twitter="@topapate"/>
     <name>dland</name>
     <setname>dland</setname>
+    <rbf>jtbubl</rbf>
     <rom index="0" zip="dland.zip|bublbobl.zip" type="merged" md5="None">
-        <!-- maincpu -->
+        <!-- maincpu - starts at 0x0 -->
         <interleave output="16">
             <part name="dl_3.u69" crc="01eb3e4f" map="12"/>
+        </interleave>
+        <interleave output="16">
             <part name="dl_5.u67" crc="75740b61" map="12"/>
+        </interleave>
+        <interleave output="16">
             <part name="dl_4.u68" crc="c6a3776f" map="12"/>
         </interleave>
-        <!-- subcpu -->
+        <part repeat="0x10000">FF</part>
+        <!-- subcpu - starts at 0x28000 -->
         <interleave output="16">
             <part name="dl_1.u42" crc="ae11a07b" map="12"/>
         </interleave>
-        <!-- audiocpu -->
+        <!-- audiocpu - starts at 0x30000 -->
         <interleave output="16">
             <part name="dl_2.u74" crc="4f9a26e8" map="12"/>
         </interleave>
-        <!-- gfx1 -->
-        <part name="dl_6.58" crc="6352d3fa"/>
-        <part name="dl_7.59" crc="37a38b69"/>
-        <part name="dl_8.60" crc="509ee5b1"/>
-        <part name="dl_9.61" crc="ae8514d7"/>
-        <part name="dl_10.62" crc="6d406fb7"/>
-        <part name="dl_11.63" crc="bdf9c0ab"/>
-        <!-- proms -->
+        <part repeat="0x8000">FF</part>
+        <!-- gfx1 - starts at 0x40000 -->
+        <interleave output="16">
+            <part name="dl_6.58" crc="6352d3fa" map="01"/>
+            <part name="dl_9.61" crc="ae8514d7" map="10"/>
+        </interleave>
+        <interleave output="16">
+            <part name="dl_7.59" crc="37a38b69" map="01"/>
+            <part name="dl_10.62" crc="6d406fb7" map="10"/>
+        </interleave>
+        <interleave output="16">
+            <part name="dl_8.60" crc="509ee5b1" map="01"/>
+            <part name="dl_11.63" crc="bdf9c0ab" map="10"/>
+        </interleave>
+        <part repeat="0x20000">FF</part>
+        <!-- proms - starts at 0xC0000 -->
         <part name="a71-25.41" crc="2d0f8545"/>
+        <!-- Total 0xC0100 bytes - 768 kBytes -->
     </rom>
+    <rom index="1">00</rom>
     <switches default="FF,FF" base="16">
         <!-- DSW0 -->
         <dip name="Game" bits="0" ids="Super Dream Land,Dream Land"/>

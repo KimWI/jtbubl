@@ -70,13 +70,14 @@ module jtbubl_game(
     input   [ 3:0]  gfx_en
 );
 
-wire        main_cs, snd_cs, snd_ok, main_ok, gfx1_ok, gfx2_ok;
+wire        main_cs, sub_cs, mcu_cs, snd_cs, gfx_cs;
+wire        main_ok, sub_ok, mcu_ok, snd_ok, gfx_ok;
 wire        snd_irq;
-wire [15:0] gfx1_data, gfx2_data;
-wire [17:0] gfx1_addr, gfx2_addr;
+wire [15:0] gfx_data;
+wire [17:0] gfx_addr;
 
-wire [ 7:0] main_data, snd_data, snd_latch;
-wire [14:0] snd_addr;
+wire [ 7:0] main_data, sub_data, mcu_data, snd_data, snd_latch;
+wire [14:0] snd_addr, sub_addr, mcu_addr;
 wire [16:0] main_addr;
 wire        cen12, prom_we;
 
@@ -84,18 +85,17 @@ wire [ 7:0] dipsw_a, dipsw_b;
 wire        LHBL, LVBL;
 
 wire [12:0] cpu_addr;
-wire        gfx_irqn, gfx1_cs, gfx2_cs, gfx1_cfg_cs, gfx2_cfg_cs, pal_cs;
-wire        gfx1_vram_cs, gfx2_vram_cs;
+wire        gfx_irqn, gfx_cs,  pal_cs;
+wire        gfx_vram_cs;
 wire        cpu_cen, cpu_rnw, cpu_irqn;
-wire [ 7:0] gfx1_dout, gfx2_dout, pal_dout, cpu_dout;
+wire [ 7:0] gfx_dout, pal_dout, cpu_dout;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
 assign { dipsw_b, dipsw_a } = dipsw[19:0];
 
 localparam SND_OFFSET  = 22'h2_0000 >> 1;
-localparam GFX1_OFFSET = SND_OFFSET  + (22'h0_8000 >> 1);
-localparam GFX2_OFFSET = GFX1_OFFSET + (22'h8_0000 >> 1);
+localparam GFX_OFFSET = SND_OFFSET  + (22'h0_8000 >> 1);
 
 jtframe_cen24 u_cen(
     .clk        ( clk24         ),    // 24 MHz
@@ -137,9 +137,9 @@ jtbubl_simloader u_simloader(
     .cpu_addr       ( cpu_addr      ),
     .cpu_dout       ( cpu_dout      ),
     .cpu_rnw        ( cpu_rnw       ),
-    .gfx1_vram_cs   ( gfx1_vram_cs  ),
+    .gfx_vram_cs   ( gfx_vram_cs  ),
     .gfx2_vram_cs   ( gfx2_vram_cs  ),
-    .gfx1_cfg_cs    ( gfx1_cfg_cs   ),
+    .gfx_cfg_cs    ( gfx_cfg_cs   ),
     .gfx2_cfg_cs    ( gfx2_cfg_cs   ),
     .pal_cs         ( pal_cs        )
 );
@@ -169,13 +169,13 @@ jtbubl_main u_main(
     .cpu_dout       ( cpu_dout      ),
     .cpu_rnw        ( cpu_rnw       ),
     .gfx_irqn       ( cpu_irqn      ),
-    .gfx1_vram_cs   ( gfx1_vram_cs  ),
+    .gfx_vram_cs   ( gfx_vram_cs  ),
     .gfx2_vram_cs   ( gfx2_vram_cs  ),
-    .gfx1_cfg_cs    ( gfx1_cfg_cs   ),
+    .gfx_cfg_cs    ( gfx_cfg_cs   ),
     .gfx2_cfg_cs    ( gfx2_cfg_cs   ),
     .pal_cs         ( pal_cs        ),
 
-    .gfx1_dout      ( gfx1_dout     ),
+    .gfx_dout      ( gfx_dout     ),
     .gfx2_dout      ( gfx2_dout     ),
     .pal_dout       ( pal_dout      ),
     // DIP switches
@@ -203,31 +203,23 @@ jtbubl_video u_video(
     .start_button   ( &start_button ),
     // PROMs
     .prom_we        ( prom_we       ),
-    .prog_addr      ( prog_addr[9:0]),
+    .prog_addr      ( prog_addr[7:0]),
     .prog_data      ( prog_data[3:0]),
     // GFX - CPU interface
     .cpu_irqn       ( cpu_irqn      ),
-    .gfx1_vram_cs   ( gfx1_vram_cs  ),
-    .gfx2_vram_cs   ( gfx2_vram_cs  ),
-    .gfx1_cfg_cs    ( gfx1_cfg_cs   ),
-    .gfx2_cfg_cs    ( gfx2_cfg_cs   ),
+    .vram_cs        ( vram_cs       ),
     .pal_cs         ( pal_cs        ),
     .cpu_rnw        ( cpu_rnw       ),
     .cpu_cen        ( cpu_cen       ),
     .cpu_addr       ( cpu_addr      ),
     .cpu_dout       ( cpu_dout      ),
-    .gfx1_dout      ( gfx1_dout     ),
-    .gfx2_dout      ( gfx2_dout     ),
+    .gfx_dout       ( gfx_dout      ),
     .pal_dout       ( pal_dout      ),
     // SDRAM
-    .gfx1_addr      ( gfx1_addr     ),
-    .gfx1_data      ( gfx1_data     ),
-    .gfx1_ok        ( gfx1_ok       ),
-    .gfx1_cs        ( gfx1_cs       ),
-    .gfx2_addr      ( gfx2_addr     ),
-    .gfx2_data      ( gfx2_data     ),
-    .gfx2_ok        ( gfx2_ok       ),
-    .gfx2_cs        ( gfx2_cs       ),
+    .gfx_addr       ( gfx_addr      ),
+    .gfx_data       ( gfx_data      ),
+    .gfx_ok         ( gfx_ok        ),
+    .gfx_cs         ( gfx_cs        ),
     // pixels
     .red            ( red           ),
     .green          ( green         ),
@@ -264,64 +256,60 @@ assign sample   = 0;
 `endif
 
 jtframe_rom #(
-    .SLOT0_AW    ( 18              ), // GFX1
-    .SLOT0_DW    ( 16              ),
-    .SLOT0_OFFSET( GFX1_OFFSET     ),
+    .SLOT0_AW    ( 17              ),
+    .SLOT0_DW    (  8              ),
+    .SLOT0_OFFSET(  0              ), // Main
 
-    .SLOT1_AW    ( 18              ), // GFX2
-    .SLOT1_DW    ( 16              ),
-    .SLOT1_OFFSET( GFX2_OFFSET     ),
+    .SLOT3_AW    ( 15              ), // Sound
+    .SLOT3_DW    (  8              ),
+    .SLOT3_OFFSET( SND_OFFSET      ),
 
-    .SLOT6_AW    ( 15              ), // Sound
-    .SLOT6_DW    (  8              ),
-    .SLOT6_OFFSET( SND_OFFSET      ),
-
-    .SLOT7_AW    ( 17              ),
-    .SLOT7_DW    (  8              ),
-    .SLOT7_OFFSET(  0              )  // Main
+    .SLOT4_AW    ( 18              ), // GFX
+    .SLOT4_DW    ( 16              ),
+    .SLOT4_OFFSET( GFX_OFFSET      )
 ) u_rom (
     .rst         ( rst           ),
     .clk         ( clk           ),
     .vblank      ( ~LVBL         ),
 
-    .slot0_cs    ( gfx1_cs       ),
-    .slot1_cs    ( gfx2_cs       ),
-    .slot2_cs    ( 1'b0          ), 
-    .slot3_cs    ( 1'b0          ), // unused
-    .slot4_cs    ( 1'b0          ), // unused
+    .slot0_cs    ( main_cs       ),
+    .slot1_cs    ( sub_cs        ),
+    .slot2_cs    ( mcu_cs        ), 
+    .slot3_cs    ( snd_cs        ), // unused
+    .slot4_cs    ( gfx_cs        ),
     .slot5_cs    ( 1'b0          ), // unused
-    .slot6_cs    ( snd_cs        ),
-    .slot7_cs    ( main_cs       ),
+    .slot6_cs    (               ),
+    .slot7_cs    ( 1'b0          ), // unused
     .slot8_cs    ( 1'b0          ),
 
-    .slot0_ok    ( gfx1_ok       ),
-    .slot1_ok    ( gfx2_ok       ),
-    .slot2_ok    (               ),
-    .slot3_ok    (               ),
-    .slot4_ok    (               ),
+    .slot0_ok    ( main_ok       ),
+    .slot1_ok    ( sub_ok        ),
+    .slot2_ok    ( mcu_ok        ),
+    .slot3_ok    ( snd_ok        ),
+    .slot4_ok    ( gfx_ok        ),
     .slot5_ok    (               ),
-    .slot6_ok    ( snd_ok        ),
-    .slot7_ok    ( main_ok       ),
+    .slot6_ok    (               ),
+    .slot7_ok    (               ),
     .slot8_ok    (               ),
 
-    .slot0_addr  ( gfx1_addr     ),
-    .slot1_addr  ( gfx2_addr     ),
-    .slot2_addr  (               ),
-    .slot3_addr  (               ),
-    .slot4_addr  (               ),
+    .slot0_addr  ( main_addr     ),
+    .slot1_addr  ( sub_addr      ),
+    .slot2_addr  ( mcu_addr      ),
+    .slot3_addr  ( snd_addr      ),
+    .slot4_addr  ( gfx_addr      ),
     .slot5_addr  (               ),
-    .slot6_addr  ( snd_addr      ),
-    .slot7_addr  ( main_addr     ),
+    .slot6_addr  (               ),
+    .slot7_addr  (               ),
     .slot8_addr  (               ),
 
-    .slot0_dout  ( gfx1_data     ),
-    .slot1_dout  ( gfx2_data     ),
-    .slot2_dout  (               ),
-    .slot3_dout  (               ),
-    .slot4_dout  (               ),
+    .slot0_dout  ( main_data     ),
+    .slot1_dout  ( sub_data      ),
+    .slot2_dout  ( mcu_data      ),
+    .slot3_dout  ( snd_data      ),
+    .slot4_dout  ( gfx_data      ),
     .slot5_dout  (               ),
-    .slot6_dout  ( snd_data      ),
-    .slot7_dout  ( main_data     ),
+    .slot6_dout  (               ),
+    .slot7_dout  (               ),
     .slot8_dout  (               ),
 
     .ready       (               ),

@@ -2279,4 +2279,559 @@
 		</port>
 		<driver status="good" emulation="good" savestate="supported"/>
 	</machine>
+	<machine name="tokio" sourcefile="bublbobl.cpp">
+		<description>Tokio / Scramble Formation (newer)</description>
+		<year>1986</year>
+		<manufacturer>Taito Corporation</manufacturer>
+		<rom name="a71-02-1.ic4" size="32768" crc="bb8dabd7" sha1="141e9f0c19bcf316477681369e2d98dffdd8435d" region="maincpu" offset="0"/>
+		<rom name="a71-03-1.ic5" size="32768" crc="ee49b383" sha1="d510a1d168542df6a87c7d7c67a47cf776a51f29" region="maincpu" offset="10000"/>
+		<rom name="a71-04.ic6" size="32768" crc="a0a4ce0e" sha1="c49bdcd85c760a5e7327d1b424772e1560f1a318" region="maincpu" offset="18000"/>
+		<rom name="a71-05.ic7" size="32768" crc="6da0b945" sha1="6c80b8333dd95657f99e6ba5b6e877733ac02a8c" region="maincpu" offset="20000"/>
+		<rom name="a71-06-1.ic8" size="32768" crc="56927b3f" sha1="33fb4e71b95664ecff1f35f6782a14101982a56d" region="maincpu" offset="28000"/>
+		<rom name="a71-01.ic1" size="32768" crc="0867c707" sha1="7129974f1252b28e9e338bd3c7fcb87210dcf412" region="subcpu" offset="0"/>
+		<rom name="a71-07.ic10" size="32768" crc="f298cc7b" sha1="ebf5c804aa07b7f198ec3e1f8d1e111cd89ebdf3" region="audiocpu" offset="0"/>
+		<rom name="a71__24.ic57" size="2048" crc="0f4b25de" sha1="e2d82aa8d8cc6a86aaf5715ef9cb62f526fd5b11" region="bmcu:mcu" offset="0"/>
+		<rom name="a71-08.ic12" size="32768" crc="0439ab13" sha1="84142220a6a29f0e34f7c7c751b583bf394df8ce" region="gfx1" offset="0"/>
+		<rom name="a71-09.ic13" size="32768" crc="edb3d2ff" sha1="0c6e4bbc786a097f9d99220e72f98c1c795a7292" region="gfx1" offset="8000"/>
+		<rom name="a71-10.ic14" size="32768" crc="69f0888c" sha1="1704ab6339981195cd09d581e83094c75037d18e" region="gfx1" offset="10000"/>
+		<rom name="a71-11.ic15" size="32768" crc="4ae07c31" sha1="452d1eb5a70e7853791cd05e4578c1454477bdec" region="gfx1" offset="18000"/>
+		<rom name="a71-12.ic16" size="32768" crc="3f6bd706" sha1="b03c534a95b71941331d3ffd9aa7069b5f05687e" region="gfx1" offset="20000"/>
+		<rom name="a71-13.ic17" size="32768" crc="f2c92aaa" sha1="7dfdc473794a298032405ba918df8085b0bbe174" region="gfx1" offset="28000"/>
+		<rom name="a71-14.ic18" size="32768" crc="c574b7b2" sha1="9839adce60c0017ae3997603a2aece511af226d2" region="gfx1" offset="30000"/>
+		<rom name="a71-15.ic19" size="32768" crc="12d87e7f" sha1="327a80f08207ee66721738f7e1c53f75b5659be0" region="gfx1" offset="38000"/>
+		<rom name="a71-16.ic30" size="32768" crc="0bce35b6" sha1="3f0496db6681c7be1e36ba41296115d158d7457a" region="gfx1" offset="40000"/>
+		<rom name="a71-17.ic31" size="32768" crc="deda6387" sha1="40f0be3a71b0a03f0275da72f4124424b162318a" region="gfx1" offset="48000"/>
+		<rom name="a71-18.ic32" size="32768" crc="330cd9d7" sha1="919f78036b760938d6aa72754be1a615f568b470" region="gfx1" offset="50000"/>
+		<rom name="a71-19.ic33" size="32768" crc="fc4b29e0" sha1="d11393a24b5c6c04f5058b299e4b0fc773a03e4b" region="gfx1" offset="58000"/>
+		<rom name="a71-20.ic34" size="32768" crc="65acb265" sha1="2ef940f994e76d4387be6e0d53a565813cc59636" region="gfx1" offset="60000"/>
+		<rom name="a71-21.ic35" size="32768" crc="33cde9b2" sha1="9b227ab609e3c7c6be90c29739a57ea4959cd68e" region="gfx1" offset="68000"/>
+		<rom name="a71-22.ic36" size="32768" crc="fb98eac0" sha1="57615c3934de5510eeeb0ba16024abda8ee95303" region="gfx1" offset="70000"/>
+		<rom name="a71-23.ic37" size="32768" crc="30bd46ad" sha1="6e1618ed237c769d1a8d329fbd7a9f7216993215" region="gfx1" offset="78000"/>
+		<rom name="a71-25.ic41" size="256" crc="2d0f8545" sha1="089c31e2f614145ef2743164f7b52ae35bc06808" region="proms" offset="0"/>
+		<rom name="a71-26.ic19" size="279" crc="4e1f119c" sha1="0ac8eb2fdb202951e5f7145f92dfd10fe96b294b" region="plds" offset="0"/>
+		<device_ref name="z80"/>
+		<device_ref name="z80"/>
+		<device_ref name="z80"/>
+		<device_ref name="taito68705"/>
+		<device_ref name="m68705p5"/>
+		<device_ref name="watchdog"/>
+		<device_ref name="screen"/>
+		<device_ref name="gfxdecode"/>
+		<device_ref name="palette"/>
+		<device_ref name="speaker"/>
+		<device_ref name="ipt_merge_all_hi"/>
+		<device_ref name="generic_latch_8"/>
+		<device_ref name="generic_latch_8"/>
+		<device_ref name="ym2203"/>
+		<chip type="cpu" tag="maincpu" name="Z80" clock="6000000"/>
+		<chip type="cpu" tag="subcpu" name="Z80" clock="6000000"/>
+		<chip type="cpu" tag="audiocpu" name="Z80" clock="3000000"/>
+		<chip type="cpu" tag="bmcu:mcu" name="MC68705P5" clock="3000000"/>
+		<chip type="audio" tag="mono" name="Speaker"/>
+		<chip type="audio" tag="ymsnd" name="YM2203 OPN" clock="3000000"/>
+		<display tag="screen" type="raster" rotate="90" width="256" height="224" refresh="59.185606" pixclock="6000000" htotal="384" hbend="0" hbstart="256" vtotal="264" vbend="16" vbstart="240" />
+		<sound channels="1"/>
+		<input players="2" coins="2" tilt="yes">
+			<control type="joy" player="1" buttons="2" ways="8"/>
+			<control type="joy" player="2" buttons="2" ways="8"/>
+		</input>
+		<dipswitch name="Cabinet" tag="DSW0" mask="1">
+			<diplocation name="SW A" number="1"/>
+			<dipvalue name="Upright" value="0" default="yes"/>
+			<dipvalue name="Cocktail" value="1"/>
+		</dipswitch>
+		<dipswitch name="Flip Screen" tag="DSW0" mask="2">
+			<diplocation name="SW A" number="2"/>
+			<dipvalue name="Off" value="2" default="yes"/>
+			<dipvalue name="On" value="0"/>
+		</dipswitch>
+		<dipswitch name="Service Mode" tag="DSW0" mask="4">
+			<diplocation name="SW A" number="3"/>
+			<dipvalue name="Off" value="4" default="yes"/>
+			<dipvalue name="On" value="0"/>
+		</dipswitch>
+		<dipswitch name="Demo Sounds" tag="DSW0" mask="8">
+			<diplocation name="SW A" number="4"/>
+			<dipvalue name="Off" value="0"/>
+			<dipvalue name="On" value="8" default="yes"/>
+		</dipswitch>
+		<dipswitch name="Coin A" tag="DSW0" mask="48">
+			<diplocation name="SW A" number="5"/>
+			<diplocation name="SW A" number="6"/>
+			<dipvalue name="2 Coins/1 Credit" value="16"/>
+			<dipvalue name="1 Coin/1 Credit" value="48" default="yes"/>
+			<dipvalue name="2 Coins/3 Credits" value="0"/>
+			<dipvalue name="1 Coin/2 Credits" value="32"/>
+		</dipswitch>
+		<dipswitch name="Coin B" tag="DSW0" mask="192">
+			<diplocation name="SW A" number="7"/>
+			<diplocation name="SW A" number="8"/>
+			<dipvalue name="2 Coins/1 Credit" value="64"/>
+			<dipvalue name="1 Coin/1 Credit" value="192" default="yes"/>
+			<dipvalue name="2 Coins/3 Credits" value="0"/>
+			<dipvalue name="1 Coin/2 Credits" value="128"/>
+		</dipswitch>
+		<dipswitch name="Enemies" tag="DSW1" mask="1">
+			<diplocation name="SW B" number="1"/>
+			<dipvalue name="Few (Easy)" value="1"/>
+			<dipvalue name="Many (Hard)" value="0" default="yes"/>
+		</dipswitch>
+		<dipswitch name="Enemy Shots" tag="DSW1" mask="2">
+			<diplocation name="SW B" number="2"/>
+			<dipvalue name="Few (Easy)" value="2" default="yes"/>
+			<dipvalue name="Many (Hard)" value="0"/>
+		</dipswitch>
+		<dipswitch name="Bonus Life" tag="DSW1" mask="12">
+			<diplocation name="SW B" number="3"/>
+			<diplocation name="SW B" number="4"/>
+			<dipvalue name="100K 400K" value="12" default="yes"/>
+			<dipvalue name="200K 400K" value="8"/>
+			<dipvalue name="300K 400K" value="4"/>
+			<dipvalue name="400K 400K" value="0"/>
+		</dipswitch>
+		<dipswitch name="Lives" tag="DSW1" mask="48">
+			<diplocation name="SW B" number="5"/>
+			<diplocation name="SW B" number="6"/>
+			<dipvalue name="3" value="48" default="yes"/>
+			<dipvalue name="4" value="32"/>
+			<dipvalue name="5" value="16"/>
+			<dipvalue name="99 (Cheat)" value="0"/>
+		</dipswitch>
+		<dipswitch name="Unused" tag="DSW1" mask="64">
+			<diplocation name="SW B" number="7"/>
+			<dipvalue name="Off" value="64" default="yes"/>
+			<dipvalue name="On" value="0"/>
+		</dipswitch>
+		<dipswitch name="Language" tag="DSW1" mask="128">
+			<diplocation name="SW B" number="8"/>
+			<dipvalue name="English" value="0" default="yes"/>
+			<dipvalue name="Japanese" value="128"/>
+		</dipswitch>
+		<port tag=":DSW0">
+		</port>
+		<port tag=":DSW1">
+		</port>
+		<port tag=":IN0">
+		</port>
+		<port tag=":IN1">
+		</port>
+		<port tag=":IN2">
+		</port>
+		<driver status="good" emulation="good" savestate="supported"/>
+	</machine>
+	<machine name="tokiob" sourcefile="bublbobl.cpp" cloneof="tokio" romof="tokio">
+		<description>Tokio / Scramble Formation (bootleg)</description>
+		<year>1986</year>
+		<manufacturer>bootleg</manufacturer>
+		<rom name="2.ic4" size="32768" crc="f583b1ef" sha1="a97b36299b51792953516224191f11decc579a38" region="maincpu" offset="0"/>
+		<rom name="a71-03.ic5" size="32768" crc="69dacf44" sha1="ee8c33702749c0e2562951f9f80c897d3fbd7dd7" region="maincpu" offset="10000"/>
+		<rom name="a71-04.ic6" merge="a71-04.ic6" size="32768" crc="a0a4ce0e" sha1="c49bdcd85c760a5e7327d1b424772e1560f1a318" region="maincpu" offset="18000"/>
+		<rom name="a71-05.ic7" merge="a71-05.ic7" size="32768" crc="6da0b945" sha1="6c80b8333dd95657f99e6ba5b6e877733ac02a8c" region="maincpu" offset="20000"/>
+		<rom name="6.ic8" size="32768" crc="1490e95b" sha1="a73e1857a1029156f0b5f7f7fe34a37870e72209" region="maincpu" offset="28000"/>
+		<rom name="a71-01.ic1" merge="a71-01.ic1" size="32768" crc="0867c707" sha1="7129974f1252b28e9e338bd3c7fcb87210dcf412" region="subcpu" offset="0"/>
+		<rom name="a71-07.ic10" merge="a71-07.ic10" size="32768" crc="f298cc7b" sha1="ebf5c804aa07b7f198ec3e1f8d1e111cd89ebdf3" region="audiocpu" offset="0"/>
+		<rom name="a71-08.ic12" merge="a71-08.ic12" size="32768" crc="0439ab13" sha1="84142220a6a29f0e34f7c7c751b583bf394df8ce" region="gfx1" offset="0"/>
+		<rom name="a71-09.ic13" merge="a71-09.ic13" size="32768" crc="edb3d2ff" sha1="0c6e4bbc786a097f9d99220e72f98c1c795a7292" region="gfx1" offset="8000"/>
+		<rom name="a71-10.ic14" merge="a71-10.ic14" size="32768" crc="69f0888c" sha1="1704ab6339981195cd09d581e83094c75037d18e" region="gfx1" offset="10000"/>
+		<rom name="a71-11.ic15" merge="a71-11.ic15" size="32768" crc="4ae07c31" sha1="452d1eb5a70e7853791cd05e4578c1454477bdec" region="gfx1" offset="18000"/>
+		<rom name="a71-12.ic16" merge="a71-12.ic16" size="32768" crc="3f6bd706" sha1="b03c534a95b71941331d3ffd9aa7069b5f05687e" region="gfx1" offset="20000"/>
+		<rom name="a71-13.ic17" merge="a71-13.ic17" size="32768" crc="f2c92aaa" sha1="7dfdc473794a298032405ba918df8085b0bbe174" region="gfx1" offset="28000"/>
+		<rom name="a71-14.ic18" merge="a71-14.ic18" size="32768" crc="c574b7b2" sha1="9839adce60c0017ae3997603a2aece511af226d2" region="gfx1" offset="30000"/>
+		<rom name="a71-15.ic19" merge="a71-15.ic19" size="32768" crc="12d87e7f" sha1="327a80f08207ee66721738f7e1c53f75b5659be0" region="gfx1" offset="38000"/>
+		<rom name="a71-16.ic30" merge="a71-16.ic30" size="32768" crc="0bce35b6" sha1="3f0496db6681c7be1e36ba41296115d158d7457a" region="gfx1" offset="40000"/>
+		<rom name="a71-17.ic31" merge="a71-17.ic31" size="32768" crc="deda6387" sha1="40f0be3a71b0a03f0275da72f4124424b162318a" region="gfx1" offset="48000"/>
+		<rom name="a71-18.ic32" merge="a71-18.ic32" size="32768" crc="330cd9d7" sha1="919f78036b760938d6aa72754be1a615f568b470" region="gfx1" offset="50000"/>
+		<rom name="a71-19.ic33" merge="a71-19.ic33" size="32768" crc="fc4b29e0" sha1="d11393a24b5c6c04f5058b299e4b0fc773a03e4b" region="gfx1" offset="58000"/>
+		<rom name="a71-20.ic34" merge="a71-20.ic34" size="32768" crc="65acb265" sha1="2ef940f994e76d4387be6e0d53a565813cc59636" region="gfx1" offset="60000"/>
+		<rom name="a71-21.ic35" merge="a71-21.ic35" size="32768" crc="33cde9b2" sha1="9b227ab609e3c7c6be90c29739a57ea4959cd68e" region="gfx1" offset="68000"/>
+		<rom name="a71-22.ic36" merge="a71-22.ic36" size="32768" crc="fb98eac0" sha1="57615c3934de5510eeeb0ba16024abda8ee95303" region="gfx1" offset="70000"/>
+		<rom name="a71-23.ic37" merge="a71-23.ic37" size="32768" crc="30bd46ad" sha1="6e1618ed237c769d1a8d329fbd7a9f7216993215" region="gfx1" offset="78000"/>
+		<rom name="a71-25.ic41" merge="a71-25.ic41" size="256" crc="2d0f8545" sha1="089c31e2f614145ef2743164f7b52ae35bc06808" region="proms" offset="0"/>
+		<device_ref name="z80"/>
+		<device_ref name="z80"/>
+		<device_ref name="z80"/>
+		<device_ref name="watchdog"/>
+		<device_ref name="screen"/>
+		<device_ref name="gfxdecode"/>
+		<device_ref name="palette"/>
+		<device_ref name="speaker"/>
+		<device_ref name="ipt_merge_all_hi"/>
+		<device_ref name="generic_latch_8"/>
+		<device_ref name="generic_latch_8"/>
+		<device_ref name="ym2203"/>
+		<chip type="cpu" tag="maincpu" name="Z80" clock="6000000"/>
+		<chip type="cpu" tag="subcpu" name="Z80" clock="6000000"/>
+		<chip type="cpu" tag="audiocpu" name="Z80" clock="3000000"/>
+		<chip type="audio" tag="mono" name="Speaker"/>
+		<chip type="audio" tag="ymsnd" name="YM2203 OPN" clock="3000000"/>
+		<display tag="screen" type="raster" rotate="90" width="256" height="224" refresh="59.185606" pixclock="6000000" htotal="384" hbend="0" hbstart="256" vtotal="264" vbend="16" vbstart="240" />
+		<sound channels="1"/>
+		<input players="2" coins="2" tilt="yes">
+			<control type="joy" player="1" buttons="2" ways="8"/>
+			<control type="joy" player="2" buttons="2" ways="8"/>
+		</input>
+		<dipswitch name="Cabinet" tag="DSW0" mask="1">
+			<diplocation name="SW A" number="1"/>
+			<dipvalue name="Upright" value="0" default="yes"/>
+			<dipvalue name="Cocktail" value="1"/>
+		</dipswitch>
+		<dipswitch name="Flip Screen" tag="DSW0" mask="2">
+			<diplocation name="SW A" number="2"/>
+			<dipvalue name="Off" value="2" default="yes"/>
+			<dipvalue name="On" value="0"/>
+		</dipswitch>
+		<dipswitch name="Service Mode" tag="DSW0" mask="4">
+			<diplocation name="SW A" number="3"/>
+			<dipvalue name="Off" value="4" default="yes"/>
+			<dipvalue name="On" value="0"/>
+		</dipswitch>
+		<dipswitch name="Demo Sounds" tag="DSW0" mask="8">
+			<diplocation name="SW A" number="4"/>
+			<dipvalue name="Off" value="0"/>
+			<dipvalue name="On" value="8" default="yes"/>
+		</dipswitch>
+		<dipswitch name="Coin A" tag="DSW0" mask="48">
+			<diplocation name="SW A" number="5"/>
+			<diplocation name="SW A" number="6"/>
+			<dipvalue name="2 Coins/1 Credit" value="16"/>
+			<dipvalue name="1 Coin/1 Credit" value="48" default="yes"/>
+			<dipvalue name="2 Coins/3 Credits" value="0"/>
+			<dipvalue name="1 Coin/2 Credits" value="32"/>
+		</dipswitch>
+		<dipswitch name="Coin B" tag="DSW0" mask="192">
+			<diplocation name="SW A" number="7"/>
+			<diplocation name="SW A" number="8"/>
+			<dipvalue name="2 Coins/1 Credit" value="64"/>
+			<dipvalue name="1 Coin/1 Credit" value="192" default="yes"/>
+			<dipvalue name="2 Coins/3 Credits" value="0"/>
+			<dipvalue name="1 Coin/2 Credits" value="128"/>
+		</dipswitch>
+		<dipswitch name="Enemies" tag="DSW1" mask="1">
+			<diplocation name="SW B" number="1"/>
+			<dipvalue name="Few (Easy)" value="1"/>
+			<dipvalue name="Many (Hard)" value="0" default="yes"/>
+		</dipswitch>
+		<dipswitch name="Enemy Shots" tag="DSW1" mask="2">
+			<diplocation name="SW B" number="2"/>
+			<dipvalue name="Few (Easy)" value="2" default="yes"/>
+			<dipvalue name="Many (Hard)" value="0"/>
+		</dipswitch>
+		<dipswitch name="Bonus Life" tag="DSW1" mask="12">
+			<diplocation name="SW B" number="3"/>
+			<diplocation name="SW B" number="4"/>
+			<dipvalue name="100K 400K" value="12" default="yes"/>
+			<dipvalue name="200K 400K" value="8"/>
+			<dipvalue name="300K 400K" value="4"/>
+			<dipvalue name="400K 400K" value="0"/>
+		</dipswitch>
+		<dipswitch name="Lives" tag="DSW1" mask="48">
+			<diplocation name="SW B" number="5"/>
+			<diplocation name="SW B" number="6"/>
+			<dipvalue name="3" value="48" default="yes"/>
+			<dipvalue name="4" value="32"/>
+			<dipvalue name="5" value="16"/>
+			<dipvalue name="99 (Cheat)" value="0"/>
+		</dipswitch>
+		<dipswitch name="Unused" tag="DSW1" mask="64">
+			<diplocation name="SW B" number="7"/>
+			<dipvalue name="Off" value="64" default="yes"/>
+			<dipvalue name="On" value="0"/>
+		</dipswitch>
+		<dipswitch name="Language" tag="DSW1" mask="128">
+			<diplocation name="SW B" number="8"/>
+			<dipvalue name="English" value="0" default="yes"/>
+			<dipvalue name="Japanese" value="128"/>
+		</dipswitch>
+		<port tag=":DSW0">
+		</port>
+		<port tag=":DSW1">
+		</port>
+		<port tag=":IN0">
+		</port>
+		<port tag=":IN1">
+		</port>
+		<port tag=":IN2">
+		</port>
+		<driver status="good" emulation="good" savestate="supported"/>
+	</machine>
+	<machine name="tokioo" sourcefile="bublbobl.cpp" cloneof="tokio" romof="tokio">
+		<description>Tokio / Scramble Formation (older)</description>
+		<year>1986</year>
+		<manufacturer>Taito Corporation</manufacturer>
+		<rom name="a71-02.ic4" size="32768" crc="d556c908" sha1="d5d8afb7f7888d77aa9a372dfbab75fbd0358cc3" region="maincpu" offset="0"/>
+		<rom name="a71-03.ic5" size="32768" crc="69dacf44" sha1="ee8c33702749c0e2562951f9f80c897d3fbd7dd7" region="maincpu" offset="10000"/>
+		<rom name="a71-04.ic6" merge="a71-04.ic6" size="32768" crc="a0a4ce0e" sha1="c49bdcd85c760a5e7327d1b424772e1560f1a318" region="maincpu" offset="18000"/>
+		<rom name="a71-05.ic7" merge="a71-05.ic7" size="32768" crc="6da0b945" sha1="6c80b8333dd95657f99e6ba5b6e877733ac02a8c" region="maincpu" offset="20000"/>
+		<rom name="a71-06.ic8" size="32768" crc="447d6779" sha1="5b329b221357a9cea777415d409a6423529a925c" region="maincpu" offset="28000"/>
+		<rom name="a71-01.ic1" merge="a71-01.ic1" size="32768" crc="0867c707" sha1="7129974f1252b28e9e338bd3c7fcb87210dcf412" region="subcpu" offset="0"/>
+		<rom name="a71-07.ic10" merge="a71-07.ic10" size="32768" crc="f298cc7b" sha1="ebf5c804aa07b7f198ec3e1f8d1e111cd89ebdf3" region="audiocpu" offset="0"/>
+		<rom name="a71__24.ic57" merge="a71__24.ic57" size="2048" crc="0f4b25de" sha1="e2d82aa8d8cc6a86aaf5715ef9cb62f526fd5b11" region="bmcu:mcu" offset="0"/>
+		<rom name="a71-08.ic12" merge="a71-08.ic12" size="32768" crc="0439ab13" sha1="84142220a6a29f0e34f7c7c751b583bf394df8ce" region="gfx1" offset="0"/>
+		<rom name="a71-09.ic13" merge="a71-09.ic13" size="32768" crc="edb3d2ff" sha1="0c6e4bbc786a097f9d99220e72f98c1c795a7292" region="gfx1" offset="8000"/>
+		<rom name="a71-10.ic14" merge="a71-10.ic14" size="32768" crc="69f0888c" sha1="1704ab6339981195cd09d581e83094c75037d18e" region="gfx1" offset="10000"/>
+		<rom name="a71-11.ic15" merge="a71-11.ic15" size="32768" crc="4ae07c31" sha1="452d1eb5a70e7853791cd05e4578c1454477bdec" region="gfx1" offset="18000"/>
+		<rom name="a71-12.ic16" merge="a71-12.ic16" size="32768" crc="3f6bd706" sha1="b03c534a95b71941331d3ffd9aa7069b5f05687e" region="gfx1" offset="20000"/>
+		<rom name="a71-13.ic17" merge="a71-13.ic17" size="32768" crc="f2c92aaa" sha1="7dfdc473794a298032405ba918df8085b0bbe174" region="gfx1" offset="28000"/>
+		<rom name="a71-14.ic18" merge="a71-14.ic18" size="32768" crc="c574b7b2" sha1="9839adce60c0017ae3997603a2aece511af226d2" region="gfx1" offset="30000"/>
+		<rom name="a71-15.ic19" merge="a71-15.ic19" size="32768" crc="12d87e7f" sha1="327a80f08207ee66721738f7e1c53f75b5659be0" region="gfx1" offset="38000"/>
+		<rom name="a71-16.ic30" merge="a71-16.ic30" size="32768" crc="0bce35b6" sha1="3f0496db6681c7be1e36ba41296115d158d7457a" region="gfx1" offset="40000"/>
+		<rom name="a71-17.ic31" merge="a71-17.ic31" size="32768" crc="deda6387" sha1="40f0be3a71b0a03f0275da72f4124424b162318a" region="gfx1" offset="48000"/>
+		<rom name="a71-18.ic32" merge="a71-18.ic32" size="32768" crc="330cd9d7" sha1="919f78036b760938d6aa72754be1a615f568b470" region="gfx1" offset="50000"/>
+		<rom name="a71-19.ic33" merge="a71-19.ic33" size="32768" crc="fc4b29e0" sha1="d11393a24b5c6c04f5058b299e4b0fc773a03e4b" region="gfx1" offset="58000"/>
+		<rom name="a71-20.ic34" merge="a71-20.ic34" size="32768" crc="65acb265" sha1="2ef940f994e76d4387be6e0d53a565813cc59636" region="gfx1" offset="60000"/>
+		<rom name="a71-21.ic35" merge="a71-21.ic35" size="32768" crc="33cde9b2" sha1="9b227ab609e3c7c6be90c29739a57ea4959cd68e" region="gfx1" offset="68000"/>
+		<rom name="a71-22.ic36" merge="a71-22.ic36" size="32768" crc="fb98eac0" sha1="57615c3934de5510eeeb0ba16024abda8ee95303" region="gfx1" offset="70000"/>
+		<rom name="a71-23.ic37" merge="a71-23.ic37" size="32768" crc="30bd46ad" sha1="6e1618ed237c769d1a8d329fbd7a9f7216993215" region="gfx1" offset="78000"/>
+		<rom name="a71-25.ic41" merge="a71-25.ic41" size="256" crc="2d0f8545" sha1="089c31e2f614145ef2743164f7b52ae35bc06808" region="proms" offset="0"/>
+		<rom name="a71-26.ic19" merge="a71-26.ic19" size="279" crc="4e1f119c" sha1="0ac8eb2fdb202951e5f7145f92dfd10fe96b294b" region="plds" offset="0"/>
+		<device_ref name="z80"/>
+		<device_ref name="z80"/>
+		<device_ref name="z80"/>
+		<device_ref name="taito68705"/>
+		<device_ref name="m68705p5"/>
+		<device_ref name="watchdog"/>
+		<device_ref name="screen"/>
+		<device_ref name="gfxdecode"/>
+		<device_ref name="palette"/>
+		<device_ref name="speaker"/>
+		<device_ref name="ipt_merge_all_hi"/>
+		<device_ref name="generic_latch_8"/>
+		<device_ref name="generic_latch_8"/>
+		<device_ref name="ym2203"/>
+		<chip type="cpu" tag="maincpu" name="Z80" clock="6000000"/>
+		<chip type="cpu" tag="subcpu" name="Z80" clock="6000000"/>
+		<chip type="cpu" tag="audiocpu" name="Z80" clock="3000000"/>
+		<chip type="cpu" tag="bmcu:mcu" name="MC68705P5" clock="3000000"/>
+		<chip type="audio" tag="mono" name="Speaker"/>
+		<chip type="audio" tag="ymsnd" name="YM2203 OPN" clock="3000000"/>
+		<display tag="screen" type="raster" rotate="90" width="256" height="224" refresh="59.185606" pixclock="6000000" htotal="384" hbend="0" hbstart="256" vtotal="264" vbend="16" vbstart="240" />
+		<sound channels="1"/>
+		<input players="2" coins="2" tilt="yes">
+			<control type="joy" player="1" buttons="2" ways="8"/>
+			<control type="joy" player="2" buttons="2" ways="8"/>
+		</input>
+		<dipswitch name="Cabinet" tag="DSW0" mask="1">
+			<diplocation name="SW A" number="1"/>
+			<dipvalue name="Upright" value="0" default="yes"/>
+			<dipvalue name="Cocktail" value="1"/>
+		</dipswitch>
+		<dipswitch name="Flip Screen" tag="DSW0" mask="2">
+			<diplocation name="SW A" number="2"/>
+			<dipvalue name="Off" value="2" default="yes"/>
+			<dipvalue name="On" value="0"/>
+		</dipswitch>
+		<dipswitch name="Service Mode" tag="DSW0" mask="4">
+			<diplocation name="SW A" number="3"/>
+			<dipvalue name="Off" value="4" default="yes"/>
+			<dipvalue name="On" value="0"/>
+		</dipswitch>
+		<dipswitch name="Demo Sounds" tag="DSW0" mask="8">
+			<diplocation name="SW A" number="4"/>
+			<dipvalue name="Off" value="0"/>
+			<dipvalue name="On" value="8" default="yes"/>
+		</dipswitch>
+		<dipswitch name="Coin A" tag="DSW0" mask="48">
+			<diplocation name="SW A" number="5"/>
+			<diplocation name="SW A" number="6"/>
+			<dipvalue name="2 Coins/1 Credit" value="16"/>
+			<dipvalue name="1 Coin/1 Credit" value="48" default="yes"/>
+			<dipvalue name="2 Coins/3 Credits" value="0"/>
+			<dipvalue name="1 Coin/2 Credits" value="32"/>
+		</dipswitch>
+		<dipswitch name="Coin B" tag="DSW0" mask="192">
+			<diplocation name="SW A" number="7"/>
+			<diplocation name="SW A" number="8"/>
+			<dipvalue name="2 Coins/1 Credit" value="64"/>
+			<dipvalue name="1 Coin/1 Credit" value="192" default="yes"/>
+			<dipvalue name="2 Coins/3 Credits" value="0"/>
+			<dipvalue name="1 Coin/2 Credits" value="128"/>
+		</dipswitch>
+		<dipswitch name="Enemies" tag="DSW1" mask="1">
+			<diplocation name="SW B" number="1"/>
+			<dipvalue name="Few (Easy)" value="1"/>
+			<dipvalue name="Many (Hard)" value="0" default="yes"/>
+		</dipswitch>
+		<dipswitch name="Enemy Shots" tag="DSW1" mask="2">
+			<diplocation name="SW B" number="2"/>
+			<dipvalue name="Few (Easy)" value="2" default="yes"/>
+			<dipvalue name="Many (Hard)" value="0"/>
+		</dipswitch>
+		<dipswitch name="Bonus Life" tag="DSW1" mask="12">
+			<diplocation name="SW B" number="3"/>
+			<diplocation name="SW B" number="4"/>
+			<dipvalue name="100K 400K" value="12" default="yes"/>
+			<dipvalue name="200K 400K" value="8"/>
+			<dipvalue name="300K 400K" value="4"/>
+			<dipvalue name="400K 400K" value="0"/>
+		</dipswitch>
+		<dipswitch name="Lives" tag="DSW1" mask="48">
+			<diplocation name="SW B" number="5"/>
+			<diplocation name="SW B" number="6"/>
+			<dipvalue name="3" value="48" default="yes"/>
+			<dipvalue name="4" value="32"/>
+			<dipvalue name="5" value="16"/>
+			<dipvalue name="99 (Cheat)" value="0"/>
+		</dipswitch>
+		<dipswitch name="Unused" tag="DSW1" mask="64">
+			<diplocation name="SW B" number="7"/>
+			<dipvalue name="Off" value="64" default="yes"/>
+			<dipvalue name="On" value="0"/>
+		</dipswitch>
+		<dipswitch name="Language" tag="DSW1" mask="128">
+			<diplocation name="SW B" number="8"/>
+			<dipvalue name="English" value="0" default="yes"/>
+			<dipvalue name="Japanese" value="128"/>
+		</dipswitch>
+		<port tag=":DSW0">
+		</port>
+		<port tag=":DSW1">
+		</port>
+		<port tag=":IN0">
+		</port>
+		<port tag=":IN1">
+		</port>
+		<port tag=":IN2">
+		</port>
+		<driver status="good" emulation="good" savestate="supported"/>
+	</machine>
+	<machine name="tokiou" sourcefile="bublbobl.cpp" cloneof="tokio" romof="tokio">
+		<description>Tokio / Scramble Formation (US)</description>
+		<year>1986</year>
+		<manufacturer>Taito America Corporation (Romstar license)</manufacturer>
+		<rom name="a71-27-1.ic4" size="32768" crc="8c180896" sha1="bc8aeb42da4bae7db6f65b9874224f60a9bc4500" region="maincpu" offset="0"/>
+		<rom name="a71-28-1.ic5" size="32768" crc="1b447527" sha1="6939e6c1b8492825d18f4e96f39ff45f4c96eea2" region="maincpu" offset="10000"/>
+		<rom name="a71-04.ic6" merge="a71-04.ic6" size="32768" crc="a0a4ce0e" sha1="c49bdcd85c760a5e7327d1b424772e1560f1a318" region="maincpu" offset="18000"/>
+		<rom name="a71-05.ic7" merge="a71-05.ic7" size="32768" crc="6da0b945" sha1="6c80b8333dd95657f99e6ba5b6e877733ac02a8c" region="maincpu" offset="20000"/>
+		<rom name="a71-06-1.ic8" merge="a71-06-1.ic8" size="32768" crc="56927b3f" sha1="33fb4e71b95664ecff1f35f6782a14101982a56d" region="maincpu" offset="28000"/>
+		<rom name="a71-01.ic1" merge="a71-01.ic1" size="32768" crc="0867c707" sha1="7129974f1252b28e9e338bd3c7fcb87210dcf412" region="subcpu" offset="0"/>
+		<rom name="a71-07.ic10" merge="a71-07.ic10" size="32768" crc="f298cc7b" sha1="ebf5c804aa07b7f198ec3e1f8d1e111cd89ebdf3" region="audiocpu" offset="0"/>
+		<rom name="a71__24.ic57" merge="a71__24.ic57" size="2048" crc="0f4b25de" sha1="e2d82aa8d8cc6a86aaf5715ef9cb62f526fd5b11" region="bmcu:mcu" offset="0"/>
+		<rom name="a71-08.ic12" merge="a71-08.ic12" size="32768" crc="0439ab13" sha1="84142220a6a29f0e34f7c7c751b583bf394df8ce" region="gfx1" offset="0"/>
+		<rom name="a71-09.ic13" merge="a71-09.ic13" size="32768" crc="edb3d2ff" sha1="0c6e4bbc786a097f9d99220e72f98c1c795a7292" region="gfx1" offset="8000"/>
+		<rom name="a71-10.ic14" merge="a71-10.ic14" size="32768" crc="69f0888c" sha1="1704ab6339981195cd09d581e83094c75037d18e" region="gfx1" offset="10000"/>
+		<rom name="a71-11.ic15" merge="a71-11.ic15" size="32768" crc="4ae07c31" sha1="452d1eb5a70e7853791cd05e4578c1454477bdec" region="gfx1" offset="18000"/>
+		<rom name="a71-12.ic16" merge="a71-12.ic16" size="32768" crc="3f6bd706" sha1="b03c534a95b71941331d3ffd9aa7069b5f05687e" region="gfx1" offset="20000"/>
+		<rom name="a71-13.ic17" merge="a71-13.ic17" size="32768" crc="f2c92aaa" sha1="7dfdc473794a298032405ba918df8085b0bbe174" region="gfx1" offset="28000"/>
+		<rom name="a71-14.ic18" merge="a71-14.ic18" size="32768" crc="c574b7b2" sha1="9839adce60c0017ae3997603a2aece511af226d2" region="gfx1" offset="30000"/>
+		<rom name="a71-15.ic19" merge="a71-15.ic19" size="32768" crc="12d87e7f" sha1="327a80f08207ee66721738f7e1c53f75b5659be0" region="gfx1" offset="38000"/>
+		<rom name="a71-16.ic30" merge="a71-16.ic30" size="32768" crc="0bce35b6" sha1="3f0496db6681c7be1e36ba41296115d158d7457a" region="gfx1" offset="40000"/>
+		<rom name="a71-17.ic31" merge="a71-17.ic31" size="32768" crc="deda6387" sha1="40f0be3a71b0a03f0275da72f4124424b162318a" region="gfx1" offset="48000"/>
+		<rom name="a71-18.ic32" merge="a71-18.ic32" size="32768" crc="330cd9d7" sha1="919f78036b760938d6aa72754be1a615f568b470" region="gfx1" offset="50000"/>
+		<rom name="a71-19.ic33" merge="a71-19.ic33" size="32768" crc="fc4b29e0" sha1="d11393a24b5c6c04f5058b299e4b0fc773a03e4b" region="gfx1" offset="58000"/>
+		<rom name="a71-20.ic34" merge="a71-20.ic34" size="32768" crc="65acb265" sha1="2ef940f994e76d4387be6e0d53a565813cc59636" region="gfx1" offset="60000"/>
+		<rom name="a71-21.ic35" merge="a71-21.ic35" size="32768" crc="33cde9b2" sha1="9b227ab609e3c7c6be90c29739a57ea4959cd68e" region="gfx1" offset="68000"/>
+		<rom name="a71-22.ic36" merge="a71-22.ic36" size="32768" crc="fb98eac0" sha1="57615c3934de5510eeeb0ba16024abda8ee95303" region="gfx1" offset="70000"/>
+		<rom name="a71-23.ic37" merge="a71-23.ic37" size="32768" crc="30bd46ad" sha1="6e1618ed237c769d1a8d329fbd7a9f7216993215" region="gfx1" offset="78000"/>
+		<rom name="a71-25.ic41" merge="a71-25.ic41" size="256" crc="2d0f8545" sha1="089c31e2f614145ef2743164f7b52ae35bc06808" region="proms" offset="0"/>
+		<rom name="a71-26.ic19" merge="a71-26.ic19" size="279" crc="4e1f119c" sha1="0ac8eb2fdb202951e5f7145f92dfd10fe96b294b" region="plds" offset="0"/>
+		<device_ref name="z80"/>
+		<device_ref name="z80"/>
+		<device_ref name="z80"/>
+		<device_ref name="taito68705"/>
+		<device_ref name="m68705p5"/>
+		<device_ref name="watchdog"/>
+		<device_ref name="screen"/>
+		<device_ref name="gfxdecode"/>
+		<device_ref name="palette"/>
+		<device_ref name="speaker"/>
+		<device_ref name="ipt_merge_all_hi"/>
+		<device_ref name="generic_latch_8"/>
+		<device_ref name="generic_latch_8"/>
+		<device_ref name="ym2203"/>
+		<chip type="cpu" tag="maincpu" name="Z80" clock="6000000"/>
+		<chip type="cpu" tag="subcpu" name="Z80" clock="6000000"/>
+		<chip type="cpu" tag="audiocpu" name="Z80" clock="3000000"/>
+		<chip type="cpu" tag="bmcu:mcu" name="MC68705P5" clock="3000000"/>
+		<chip type="audio" tag="mono" name="Speaker"/>
+		<chip type="audio" tag="ymsnd" name="YM2203 OPN" clock="3000000"/>
+		<display tag="screen" type="raster" rotate="90" width="256" height="224" refresh="59.185606" pixclock="6000000" htotal="384" hbend="0" hbstart="256" vtotal="264" vbend="16" vbstart="240" />
+		<sound channels="1"/>
+		<input players="2" coins="2" tilt="yes">
+			<control type="joy" player="1" buttons="2" ways="8"/>
+			<control type="joy" player="2" buttons="2" ways="8"/>
+		</input>
+		<dipswitch name="Cabinet" tag="DSW0" mask="1">
+			<diplocation name="SW A" number="1"/>
+			<dipvalue name="Upright" value="0" default="yes"/>
+			<dipvalue name="Cocktail" value="1"/>
+		</dipswitch>
+		<dipswitch name="Flip Screen" tag="DSW0" mask="2">
+			<diplocation name="SW A" number="2"/>
+			<dipvalue name="Off" value="2" default="yes"/>
+			<dipvalue name="On" value="0"/>
+		</dipswitch>
+		<dipswitch name="Service Mode" tag="DSW0" mask="4">
+			<diplocation name="SW A" number="3"/>
+			<dipvalue name="Off" value="4" default="yes"/>
+			<dipvalue name="On" value="0"/>
+		</dipswitch>
+		<dipswitch name="Demo Sounds" tag="DSW0" mask="8">
+			<diplocation name="SW A" number="4"/>
+			<dipvalue name="Off" value="0"/>
+			<dipvalue name="On" value="8" default="yes"/>
+		</dipswitch>
+		<dipswitch name="Coin A" tag="DSW0" mask="48">
+			<diplocation name="SW A" number="5"/>
+			<diplocation name="SW A" number="6"/>
+			<dipvalue name="2 Coins/1 Credit" value="16"/>
+			<dipvalue name="1 Coin/1 Credit" value="48" default="yes"/>
+			<dipvalue name="2 Coins/3 Credits" value="0"/>
+			<dipvalue name="1 Coin/2 Credits" value="32"/>
+		</dipswitch>
+		<dipswitch name="Coin B" tag="DSW0" mask="192">
+			<diplocation name="SW A" number="7"/>
+			<diplocation name="SW A" number="8"/>
+			<dipvalue name="2 Coins/1 Credit" value="64"/>
+			<dipvalue name="1 Coin/1 Credit" value="192" default="yes"/>
+			<dipvalue name="2 Coins/3 Credits" value="0"/>
+			<dipvalue name="1 Coin/2 Credits" value="128"/>
+		</dipswitch>
+		<dipswitch name="Enemies" tag="DSW1" mask="1">
+			<diplocation name="SW B" number="1"/>
+			<dipvalue name="Few (Easy)" value="1"/>
+			<dipvalue name="Many (Hard)" value="0" default="yes"/>
+		</dipswitch>
+		<dipswitch name="Enemy Shots" tag="DSW1" mask="2">
+			<diplocation name="SW B" number="2"/>
+			<dipvalue name="Few (Easy)" value="2" default="yes"/>
+			<dipvalue name="Many (Hard)" value="0"/>
+		</dipswitch>
+		<dipswitch name="Bonus Life" tag="DSW1" mask="12">
+			<diplocation name="SW B" number="3"/>
+			<diplocation name="SW B" number="4"/>
+			<dipvalue name="100K 400K" value="12" default="yes"/>
+			<dipvalue name="200K 400K" value="8"/>
+			<dipvalue name="300K 400K" value="4"/>
+			<dipvalue name="400K 400K" value="0"/>
+		</dipswitch>
+		<dipswitch name="Lives" tag="DSW1" mask="48">
+			<diplocation name="SW B" number="5"/>
+			<diplocation name="SW B" number="6"/>
+			<dipvalue name="3" value="48" default="yes"/>
+			<dipvalue name="4" value="32"/>
+			<dipvalue name="5" value="16"/>
+			<dipvalue name="99 (Cheat)" value="0"/>
+		</dipswitch>
+		<dipswitch name="Unused" tag="DSW1" mask="64">
+			<diplocation name="SW B" number="7"/>
+			<dipvalue name="Off" value="64" default="yes"/>
+			<dipvalue name="On" value="0"/>
+		</dipswitch>
+		<dipswitch name="Language" tag="DSW1" mask="128">
+			<diplocation name="SW B" number="8"/>
+			<dipvalue name="English" value="0" default="yes"/>
+			<dipvalue name="Japanese" value="128"/>
+		</dipswitch>
+		<port tag=":DSW0">
+		</port>
+		<port tag=":DSW1">
+		</port>
+		<port tag=":IN0">
+		</port>
+		<port tag=":IN1">
+		</port>
+		<port tag=":IN2">
+		</port>
+		<driver status="good" emulation="good" savestate="supported"/>
+	</machine>
 </mame>

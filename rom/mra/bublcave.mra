@@ -23,40 +23,60 @@
     <about author="jotego" webpage="https://patreon.com/topapate" source="https://github.com/jotego/jtbubl" twitter="@topapate"/>
     <name>bublcave</name>
     <setname>bublcave</setname>
+    <rbf>jtbubl</rbf>
     <rom index="0" zip="bublcave.zip|bublbobl.zip" type="merged" md5="None">
-        <!-- maincpu -->
+        <!-- maincpu - starts at 0x0 -->
         <interleave output="16">
             <part name="bublcave-06.51" crc="e8b9af5e" map="12"/>
+        </interleave>
+        <interleave output="16">
             <part name="bublcave-05.52" crc="cfe14cb8" map="12"/>
         </interleave>
-        <!-- subcpu -->
+        <part repeat="0x10000">FF</part>
+        <!-- subcpu - starts at 0x28000 -->
         <interleave output="16">
             <part name="bublcave-08.37" crc="a9384086" map="12"/>
         </interleave>
-        <!-- audiocpu -->
+        <!-- audiocpu - starts at 0x30000 -->
         <interleave output="16">
             <part name="a78-07.46" crc="4f9a26e8" map="12"/>
         </interleave>
-        <!-- mcu -->
+        <!-- mcu - starts at 0x38000 -->
         <interleave output="16">
             <part name="a78-01.17" crc="b1bfb53d" map="12"/>
         </interleave>
-        <!-- gfx1 -->
-        <part name="bublcave-09.12" crc="b90b7eef"/>
-        <part name="bublcave-10.13" crc="4fb22f05"/>
-        <part name="bublcave-11.14" crc="9773e512"/>
-        <part name="bublcave-12.15" crc="e49eb49e"/>
-        <part name="bublcave-13.16" crc="61919734"/>
-        <part name="bublcave-14.17" crc="7e3a13bd"/>
-        <part name="bublcave-15.30" crc="c253c73a"/>
-        <part name="bublcave-16.31" crc="e66c92ee"/>
-        <part name="bublcave-17.32" crc="d69762d5"/>
-        <part name="bublcave-18.33" crc="47ee2544"/>
-        <part name="bublcave-19.34" crc="1ceeb1fa"/>
-        <part name="bublcave-20.35" crc="64322e24"/>
-        <!-- proms -->
+        <part repeat="0x7000">FF</part>
+        <!-- gfx1 - starts at 0x40000 -->
+        <interleave output="16">
+            <part name="bublcave-09.12" crc="b90b7eef" map="01"/>
+            <part name="bublcave-15.30" crc="c253c73a" map="10"/>
+        </interleave>
+        <interleave output="16">
+            <part name="bublcave-10.13" crc="4fb22f05" map="01"/>
+            <part name="bublcave-16.31" crc="e66c92ee" map="10"/>
+        </interleave>
+        <interleave output="16">
+            <part name="bublcave-11.14" crc="9773e512" map="01"/>
+            <part name="bublcave-17.32" crc="d69762d5" map="10"/>
+        </interleave>
+        <interleave output="16">
+            <part name="bublcave-12.15" crc="e49eb49e" map="01"/>
+            <part name="bublcave-18.33" crc="47ee2544" map="10"/>
+        </interleave>
+        <interleave output="16">
+            <part name="bublcave-13.16" crc="61919734" map="01"/>
+            <part name="bublcave-19.34" crc="1ceeb1fa" map="10"/>
+        </interleave>
+        <interleave output="16">
+            <part name="bublcave-14.17" crc="7e3a13bd" map="01"/>
+            <part name="bublcave-20.35" crc="64322e24" map="10"/>
+        </interleave>
+        <part repeat="0x20000">FF</part>
+        <!-- proms - starts at 0xC0000 -->
         <part name="a71-25.41" crc="2d0f8545"/>
+        <!-- Total 0xC0100 bytes - 768 kBytes -->
     </rom>
+    <rom index="1">00</rom>
     <switches default="FF,FF" base="16">
         <!-- DSW0 -->
         <dip name="Flip Screen" bits="1" ids="On,Off"/>

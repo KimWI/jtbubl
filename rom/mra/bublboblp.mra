@@ -23,38 +23,56 @@
     <about author="jotego" webpage="https://patreon.com/topapate" source="https://github.com/jotego/jtbubl" twitter="@topapate"/>
     <name>bublboblp</name>
     <setname>bublboblp</setname>
+    <rbf>jtbubl</rbf>
     <rom index="0" zip="bublboblp.zip|bublbobl.zip" type="merged" md5="None">
-        <!-- maincpu -->
+        <!-- maincpu - starts at 0x0 -->
         <interleave output="16">
             <part name="maincpu.ic4" crc="874ddd6c" map="12"/>
+        </interleave>
+        <interleave output="16">
             <part name="maincpu.ic5" crc="588cc602" map="12"/>
         </interleave>
-        <!-- subcpu -->
+        <part repeat="0x18000">FF</part>
+        <!-- subcpu - starts at 0x28000 -->
         <interleave output="16">
             <part name="subcpu.ic1" crc="e8187e8f" map="12"/>
         </interleave>
-        <!-- audiocpu -->
+        <!-- audiocpu - starts at 0x30000 -->
         <interleave output="16">
             <part name="audiocpu.ic10" crc="c516c26e" map="12"/>
         </interleave>
-        <!-- gfx1 -->
-        <part name="c1.ic12" crc="183d378b"/>
-        <part name="c3.ic13" crc="55408ff9"/>
-        <part name="c5.ic14" crc="12cc5949"/>
-        <part name="c7.ic15" crc="10e24f35"/>
-        <part name="c9.ic16" crc="dec95961"/>
-        <part name="c11.ic17" crc="1c49d228"/>
-        <part name="c0.ic30" crc="39d0ce8f"/>
-        <part name="c2.ic31" crc="f705a512"/>
-        <part name="c4.ic32" crc="151df0eb"/>
-        <part name="c6.ic33" crc="7b737c1e"/>
-        <part name="c8.ic34" crc="1320e15d"/>
-        <part name="c10.ic35" crc="29c41387"/>
-        <!-- proms -->
+        <part repeat="0x8000">FF</part>
+        <!-- gfx1 - starts at 0x40000 -->
+        <interleave output="16">
+            <part name="c1.ic12" crc="183d378b" map="01"/>
+            <part name="c0.ic30" crc="39d0ce8f" map="10"/>
+        </interleave>
+        <interleave output="16">
+            <part name="c3.ic13" crc="55408ff9" map="01"/>
+            <part name="c2.ic31" crc="f705a512" map="10"/>
+        </interleave>
+        <interleave output="16">
+            <part name="c5.ic14" crc="12cc5949" map="01"/>
+            <part name="c4.ic32" crc="151df0eb" map="10"/>
+        </interleave>
+        <interleave output="16">
+            <part name="c7.ic15" crc="10e24f35" map="01"/>
+            <part name="c6.ic33" crc="7b737c1e" map="10"/>
+        </interleave>
+        <interleave output="16">
+            <part name="c9.ic16" crc="dec95961" map="01"/>
+            <part name="c8.ic34" crc="1320e15d" map="10"/>
+        </interleave>
+        <interleave output="16">
+            <part name="c11.ic17" crc="1c49d228" map="01"/>
+            <part name="c10.ic35" crc="29c41387" map="10"/>
+        </interleave>
+        <part repeat="0x20000">FF</part>
+        <!-- proms - starts at 0xC0000 -->
         <part name="a71-25.ic41" crc="2d0f8545"/>
-        <!-- plds -->
-        <part name="bublboblp.pal16l8.ic19" crc="4e1f119c"/>
+        <!-- Total 0xC0100 bytes - 768 kBytes -->
     </rom>
+    <rom index="1">00</rom>
     <switches default="FF,FF" base="16">
         <!-- DSW0 -->
         <dip name="Language" bits="0" ids="English,Japanese"/>
