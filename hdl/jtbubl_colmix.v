@@ -23,16 +23,16 @@ module jtbubl_colmix(
     //output              pxl2_cen,
     input               pxl_cen,
     // Screen
-    output              LHBL,
-    output              LVBL,
+    input               LHBL,
+    input               LVBL,
     output              LHBL_dly,
     output              LVBL_dly,
-    input      [10:0]   col_addr,
+    input      [ 7:0]   col_addr,
     // CPU interface
     input               pal_cs,
     output     [ 7:0]   pal_dout,
     input               cpu_rnw,
-    input      [11:0]   cpu_addr,
+    input      [ 8:0]   cpu_addr,
     input      [ 7:0]   cpu_dout,    
     // Colours
     output     [ 3:0]   red,
@@ -45,15 +45,16 @@ wire [11:0] col_out;
 wire [ 7:0] col0_data, col1_data;
 wire        pal0_we = pal_cs & ~cpu_rnw & ~cpu_addr[0];
 wire        pal1_we = pal_cs & ~cpu_rnw &  cpu_addr[0];
+wire [ 7:0] cpu_a11 = cpu_addr[8:1];
 
 assign { red, green, blue } = col_out;
 
-jtframe_dual_ram #(.aw(11),.simfile("pal_even.hex")) u_ram0(
+jtframe_dual_ram #(.aw(8),.simfile("pal_even.hex")) u_ram0(
     .clk0   ( clk24     ),
     .clk1   ( clk       ),
     // Port 0
     .data0  ( cpu_dout  ),
-    .addr0  ( cpu_addr  ),
+    .addr0  ( cpu_a11   ),
     .we0    ( pal0_we   ),
     .q0     ( pal_dout  ),
     // Port 1
@@ -63,12 +64,12 @@ jtframe_dual_ram #(.aw(11),.simfile("pal_even.hex")) u_ram0(
     .q1     ( col0_data )
 );
 
-jtframe_dual_ram #(.aw(11),.simfile("pal_odd.hex")) u_ram1(
+jtframe_dual_ram #(.aw(8),.simfile("pal_odd.hex")) u_ram1(
     .clk0   ( clk24     ),
     .clk1   ( clk       ),
     // Port 0
     .data0  ( cpu_dout  ),
-    .addr0  ( cpu_addr  ),
+    .addr0  ( cpu_a11   ),
     .we0    ( pal1_we   ),
     .q0     ( pal_dout  ),
     // Port 1

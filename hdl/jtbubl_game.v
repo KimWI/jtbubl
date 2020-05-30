@@ -73,11 +73,11 @@ wire        main_cs, sub_cs, mcu_cs, snd_cs, gfx_cs;
 wire        main_ok, sub_ok, mcu_ok, snd_ok, gfx_ok;
 wire        snd_irq;
 wire [15:0] gfx_data;
-wire [17:0] gfx_addr;
+wire [18:0] gfx_addr;
 
 wire [ 7:0] main_data, sub_data, mcu_data, snd_data, snd_latch;
 wire [14:0] snd_addr, sub_addr, mcu_addr;
-wire [16:0] main_addr;
+wire [17:0] main_addr;
 wire        cen12, prom_we;
 
 wire [ 7:0] dipsw_a, dipsw_b;
@@ -241,23 +241,23 @@ assign sample   = 0;
 `endif
 
 jtframe_rom #(
-    .SLOT0_AW    ( 17              ),
+    .SLOT0_AW    ( 18              ),
     .SLOT0_DW    (  8              ),
     .SLOT0_OFFSET(  0              ), // Main
 
-    .SLOT0_AW    ( 17              ),
-    .SLOT0_DW    (  8              ),
-    .SLOT0_OFFSET(  SUB_OFFSET     ), // Sub
+    .SLOT1_AW    ( 15              ),
+    .SLOT1_DW    (  8              ),
+    .SLOT1_OFFSET(  SUB_OFFSET     ), // Sub
 
-    .SLOT0_AW    ( 17              ),
-    .SLOT0_DW    (  8              ),
-    .SLOT0_OFFSET(  MCU_OFFSET     ), // MCU
+    .SLOT2_AW    ( 15              ),
+    .SLOT2_DW    (  8              ),
+    .SLOT2_OFFSET(  MCU_OFFSET     ), // MCU
 
     .SLOT3_AW    ( 15              ), // Sound
     .SLOT3_DW    (  8              ),
     .SLOT3_OFFSET( SND_OFFSET      ),
 
-    .SLOT4_AW    ( 18              ), // GFX
+    .SLOT4_AW    ( 19              ), // GFX
     .SLOT4_DW    ( 16              ),
     .SLOT4_OFFSET( GFX_OFFSET      )
 ) u_rom (

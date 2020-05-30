@@ -52,7 +52,7 @@ module jtbubl_video(
     output     [ 7:0]   vram_dout,
     //output              cpu_irqn,
     // SDRAM interface
-    output     [17:0]   gfx_addr,
+    output     [18:0]   gfx_addr,
     input      [15:0]   gfx_data,
     input               gfx_ok,
     output              gfx_cs,
@@ -65,7 +65,7 @@ module jtbubl_video(
 );
 
 wire [ 8:0] vrender, vrender1, vdump, hdump;
-wire [12:0] col_addr;
+wire [ 7:0] col_addr;
 
 jtframe_cen48 u_cen(
     .clk        ( clk       ),    // 48 MHz
@@ -121,7 +121,7 @@ jtbubl_gfx u_gfx(
     // CPU interface
     .vram_cs    ( vram_cs        ),
     .vram_dout  ( vram_dout      ),
-    .cpu_addr   ( cpu_addr[10:0] ),
+    .cpu_addr   ( cpu_addr       ),
     .cpu_rnw    ( cpu_rnw        ),
     .cpu_dout   ( cpu_dout       ),
     // SDRAM
@@ -146,7 +146,7 @@ jtbubl_colmix u_colmix(
     // Color address to palette
     .col_addr   ( col_addr       ),
     // CPU interface
-    .cpu_addr   ( cpu_addr[10:0] ),
+    .cpu_addr   ( cpu_addr[11:0] ),
     .cpu_rnw    ( cpu_rnw        ),
     .cpu_dout   ( cpu_dout       ),
     .pal_cs     ( pal_cs         ),

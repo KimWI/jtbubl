@@ -12,6 +12,17 @@ for k in $*; do
     fi
 done
 
+# Find PROM file
+if [ ! -e prom.hex ]; then
+    zipfile=$(locate bublbobl.zip | head -n 1)
+    if [ -z "$zipfile" ]; then
+        echo "Cannot locate bublbobl.zip. Needed to generate prom.hex."
+        exit 1
+    fi
+    unzip -o $zipfile a71-25.41 || exit $?
+    byte2hex < a71-25.41 > prom.hex
+fi
+
 export GAME_ROM_PATH=../../rom/bublbobl.rom
 export MEM_CHECK_TIME=310_000_000
 # 280ms to load the ROM ~17 frames
