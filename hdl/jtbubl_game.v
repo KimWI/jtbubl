@@ -86,7 +86,7 @@ wire        LHBL, LVBL;
 wire [12:0] cpu_addr;
 wire        vram_cs,  pal_cs;
 wire        cpu_cen, cpu_rnw, cpu_irqn;
-wire [ 7:0] gfx_dout, pal_dout, cpu_dout;
+wire [ 7:0] vram_dout, pal_dout, cpu_dout;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
@@ -168,6 +168,12 @@ jtbubl_main u_main(
     .dipsw_a        ( dipsw_a       ),
     .dipsw_b        ( dipsw_b       )
 );
+`else 
+assign main_cs = 0;
+assign cpu_rnw = 1;
+assign vram_cs = 0;
+assign pal_cs  = 0;
+assign cpu_cen = 0;
 `endif
 
 jtbubl_video u_video(
@@ -188,27 +194,26 @@ jtbubl_video u_video(
     // PROMs
     .prom_we        ( prom_we       ),
     .prog_addr      ( prog_addr[7:0]),
-    .prog_data      ( prog_data[3:0]),
-    /*
+    .prog_data      ( prog_data[3:0]),    
     // GFX - CPU interface
-    .cpu_irqn       ( cpu_irqn      ),
+    //.cpu_irqn       ( cpu_irqn      ),
     .vram_cs        ( vram_cs       ),
     .pal_cs         ( pal_cs        ),
     .cpu_rnw        ( cpu_rnw       ),
     .cpu_cen        ( cpu_cen       ),
     .cpu_addr       ( cpu_addr      ),
     .cpu_dout       ( cpu_dout      ),
-    .gfx_dout       ( gfx_dout      ),
+    .vram_dout      ( vram_dout     ),
     .pal_dout       ( pal_dout      ),
     // SDRAM
-    .gfx_addr       ( gfx_addr      ),
-    .gfx_data       ( gfx_data      ),
-    .gfx_ok         ( gfx_ok        ),
-    .gfx_cs         ( gfx_cs        ),
+    .rom_addr       ( gfx_addr      ),
+    .rom_data       ( gfx_data      ),
+    .rom_ok         ( gfx_ok        ),
+    .rom_cs         ( gfx_cs        ),
     // pixels
     .red            ( red           ),
     .green          ( green         ),
-    .blue           ( blue          ),*/
+    .blue           ( blue          ),
     // Test
     .gfx_en         ( gfx_en        )
 );
@@ -239,6 +244,9 @@ assign snd_left = 16'd0;
 assign snd_right= 16'd0;
 assign sample   = 0;
 `endif
+
+assign sub_cs = 0;
+assign mcu_cs = 0;
 
 jtframe_rom #(
     .SLOT0_AW    ( 18              ),
@@ -271,7 +279,7 @@ jtframe_rom #(
     .slot3_cs    ( snd_cs        ), // unused
     .slot4_cs    ( gfx_cs        ),
     .slot5_cs    ( 1'b0          ), // unused
-    .slot6_cs    (               ),
+    .slot6_cs    ( 1'b0          ),
     .slot7_cs    ( 1'b0          ), // unused
     .slot8_cs    ( 1'b0          ),
 

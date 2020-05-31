@@ -30,6 +30,7 @@ module mist_dump(
                 $dumpvars(0,mist_test);
             `else
                 $dumpvars(0,mist_test.UUT.u_game.u_video);
+                // $dumpvars(0,mist_test.UUT.u_game.u_sdram);
             `endif
             $dumpon;
         end

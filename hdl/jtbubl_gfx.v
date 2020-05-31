@@ -78,21 +78,25 @@ localparam [10:0] OBJ_START = 11'h140;
 
 reg  [ 9:0] code;
 // Let's follow the original signal names but in lower case
-reg  [ 9:0] oa;   // VRAM address for first read (object)
+reg  [ 8:0] oa;   // VRAM address for first read (object)
+reg         oatop;
 wire [11:0] sa;   // VRAM address for second read (char)
 reg  [ 7:0] vsub, sa_base, hotpxl;
 reg  [31:0] pxl_data;
 reg  [ 8:0] hpos;
 reg  [ 3:0] bank, pal;
 wire [10:0] cbus; // address to read VRAM
-reg         ch, hflip, vflip, waitok;
+reg         ch, hflip, vflip;
+reg  [ 1:0] waitok;
 reg         last_LHBL;
 reg         busy, idle; // extra cycle to wait for memories
+wire [15:0] vrmux;
 
-assign cbus      = ch ? { sa[10:6],oa[0],sa[4:0] } : {1'b1, oa };
+assign cbus      = ch ? { sa[10:6],oa[0],sa[4:0] } : {1'b1, oatop, oa };
 assign rom_addr  = { bank, code, vsub[2:0]^{3{vflip}}, 1'b0 }; // 18 bits
 assign sa        = { sa_base[7]&sa_base[5], sa_base[4:0], 1'b0, dec_dout[1:0], vsub[5:3] };
 assign dec_addr  = { LVBL, sa_base[7:5], vsub[7:4] };
+assign vrmux     = sa[11] ? {scan3_data, scan2_data} : {scan1_data, scan0_data};
 
 always @(posedge clk) last_LHBL <= LHBL;
 
@@ -111,11 +115,13 @@ always @(posedge clk, posedge rst) begin
         vsub    <= 8'd0;
         hflip   <= 0;
         vflip   <= 0;
+        sa_base <= 8'd0;
     end else begin
-        if( !LHBL /*|| oa[8:1]==8'd48*/ ) begin // note that tile drawing is disabled if LHBL is low
-            oa      <= 10'd0;
+        if( !LHBL /*|| oa[8:1]==8'h70*/ ) begin // note that tile drawing is disabled if LHBL is low
+            oa      <= 9'h80;
             ch      <= 0;
             idle    <= 0;
+            oatop   <= 1;
         end else begin
             // will need to gate for the ROM later on
             if( !busy )
@@ -126,15 +132,16 @@ always @(posedge clk, posedge rst) begin
                     sa_base <= scan3_data;
                 end
                 2'd1: begin
-                    hpos    <= {scan1_data[6], scan0_data };
-                    bank    <= scan1_data[3:0]; // there was a provision to use bit 4
+                    oatop   <= ~scan3_data[7];
+                    hpos    <= {scan3_data[6], scan2_data };
+                    bank    <= scan3_data[3:0]; // there was a provision to use bit 4
                                // too on the board via a jumper but was never used
                 end
                 2'd3: begin
-                    code <= { scan1_data[1:0], scan0_data };
-                    pal  <= scan1_data[5:2];
-                    hflip<= scan1_data[6];
-                    vflip<= scan1_data[7];
+                    code <= vrmux[9:0];
+                    pal  <= vrmux[13:10];
+                    hflip<= vrmux[14];
+                    vflip<= vrmux[15];
                 end
             endcase
         end
@@ -156,29 +163,28 @@ always @(posedge clk, posedge rst) begin
         busy    <= 0;
         rom_cs  <= 0;
         line_we <= 0;
-        waitok  <= 1;
+        waitok  <= 2'b11;
     end else begin
         if( !LHBL ) begin
             busy    <= 0;
             line_we <= 0;
             rom_cs  <= 0;            
-            waitok  <= 1;
         end else
         if( &{ch,oa[0],idle} & ~busy) begin
-            busy      <= 1;
-            rom_cs    <= 1;
-            waitok    <= 1;
-            line_addr <= hpos-9'd1;
-            hotpxl[7] <= 1;
+            busy        <= 1;
+            rom_cs      <= 1;
+            waitok      <= 2'b11;
+            line_addr   <= hpos-9'd1;            
         end else if(busy) begin
-            waitok <= 0;
-            if( !waitok && rom_ok && hotpxl[7:6]==2'b10 ) begin
+            waitok[0] <= 0;
+            if( waitok[1] && rom_ok ) begin
                 pxl_data <= { rom_data[ 3: 0], rom_data[11: 8],
                               rom_data[ 7: 4], rom_data[15:12],
                               rom_data[19:16], rom_data[27:24],
                               rom_data[23:20], rom_data[31:28] };
                 hotpxl    <= 8'h0;
-            end else begin
+                waitok[1] <= 0;
+            end else if(!waitok[1]) begin
                 line_addr <= line_addr + 9'd1;
                 line_din  <= {pal, get_pxl(pxl_data, hflip) };
                 line_we   <= 1;

@@ -52,10 +52,10 @@ module jtbubl_video(
     output     [ 7:0]   vram_dout,
     //output              cpu_irqn,
     // SDRAM interface
-    output     [17:0]   gfx_addr,
-    input      [31:0]   gfx_data,
-    input               gfx_ok,
-    output              gfx_cs,
+    output     [17:0]   rom_addr,
+    input      [31:0]   rom_data,
+    input               rom_ok,
+    output              rom_cs,
     // Colours
     output     [ 3:0]   red,
     output     [ 3:0]   green,
@@ -118,6 +118,8 @@ jtbubl_gfx u_gfx(
     // Screen
     .LHBL       ( LHBL           ),
     .LVBL       ( LVBL           ),
+    .vdump      ( vdump[7:0]     ),
+    .hdump      ( hdump          ),
     // CPU interface
     .vram_cs    ( vram_cs        ),
     .vram_dout  ( vram_dout      ),
@@ -125,10 +127,10 @@ jtbubl_gfx u_gfx(
     .cpu_rnw    ( cpu_rnw        ),
     .cpu_dout   ( cpu_dout       ),
     // SDRAM
-    .rom_addr   ( gfx_addr       ),
-    .rom_data   ( gfx_data       ),
-    .rom_ok     ( gfx_ok         ),
-    .rom_cs     ( gfx_cs         ),
+    .rom_addr   ( rom_addr       ),
+    .rom_data   ( rom_data       ),
+    .rom_ok     ( rom_ok         ),
+    .rom_cs     ( rom_cs         ),
     // Color address to palette
     .col_addr   ( col_addr       )
 );
