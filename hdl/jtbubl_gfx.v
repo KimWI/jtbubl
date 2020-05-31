@@ -91,12 +91,15 @@ reg  [ 1:0] waitok;
 reg         last_LHBL;
 reg         busy, idle; // extra cycle to wait for memories
 wire [15:0] vrmux;
+wire        lden_b, next;
 
 assign cbus      = ch ? { sa[10:6],oa[0],sa[4:0] } : {1'b1, oatop, oa };
 assign rom_addr  = { bank, code, vsub[2:0]^{3{vflip}}, 1'b0 }; // 18 bits
 assign sa        = { sa_base[7]&sa_base[5], sa_base[4:0], 1'b0, dec_dout[1:0], vsub[5:3] };
 assign dec_addr  = { LVBL, sa_base[7:5], vsub[7:4] };
 assign vrmux     = sa[11] ? {scan3_data, scan2_data} : {scan1_data, scan0_data};
+assign lden_b    = dec_dout[2];
+assign next      = dec_dout[3];
 
 always @(posedge clk) last_LHBL <= LHBL;
 
@@ -124,16 +127,24 @@ always @(posedge clk, posedge rst) begin
             oatop   <= 1;
         end else begin
             // will need to gate for the ROM later on
-            if( !busy )
-                { oa[8:1], ch, oa[0], idle } <= { oa[8:1], ch, oa[0], idle } + 10'd1;
-            case( {ch, oa[0]} )
+            if( !busy && |oa ) begin
+                if( {ch,oa[0],idle}==3'b011 && next ) begin
+                    oa[8:1]<= oa[8:1]+8'd1;
+                    { ch, oa[0], idle } <= 3'd0;
+                end else begin
+                    { oa[8:1], ch, oa[0], idle } <= { oa[8:1], ch, oa[0], idle } + 10'd1;
+                end
+            end
+            if(idle) case( {ch, oa[0]} )
                 2'd0: begin
                     vsub    <= scan2_data+vdump;
                     sa_base <= scan3_data;
                 end
                 2'd1: begin
                     oatop   <= ~scan3_data[7];
-                    hpos    <= {scan3_data[6], scan2_data };
+                    hpos    <= lden_b ? 
+                        line_addr : 
+                        {scan3_data[6], scan2_data };
                     bank    <= scan3_data[3:0]; // there was a provision to use bit 4
                                // too on the board via a jumper but was never used
                 end
@@ -154,8 +165,8 @@ function [3:0] get_pxl;
     input        hflip;
 
     get_pxl = hflip ?
-        { pxl_data[0], pxl_data[ 8], pxl_data[16], pxl_data[24] } :
-        { pxl_data[7], pxl_data[15], pxl_data[23], pxl_data[31] };
+        { pxl_data[7], pxl_data[15], pxl_data[23], pxl_data[31] } :
+        { pxl_data[0], pxl_data[ 8], pxl_data[16], pxl_data[24] };
 endfunction
 
 always @(posedge clk, posedge rst) begin
@@ -178,17 +189,19 @@ always @(posedge clk, posedge rst) begin
         end else if(busy) begin
             waitok[0] <= 0;
             if( waitok[1] && rom_ok ) begin
-                pxl_data <= { rom_data[ 3: 0], rom_data[11: 8],
-                              rom_data[ 7: 4], rom_data[15:12],
-                              rom_data[19:16], rom_data[27:24],
-                              rom_data[23:20], rom_data[31:28] };
+                pxl_data <= { 
+                    rom_data[19:16], rom_data[ 3: 0], // plane 0
+                    rom_data[23:20], rom_data[ 7: 4], // plane 1
+                    rom_data[27:24], rom_data[11: 8], // plane 2
+                    rom_data[31:28], rom_data[15:12]  // plane 3
+                 };
                 hotpxl    <= 8'h0;
                 waitok[1] <= 0;
             end else if(!waitok[1]) begin
                 line_addr <= line_addr + 9'd1;
                 line_din  <= {pal, get_pxl(pxl_data, hflip) };
                 line_we   <= 1;
-                pxl_data  <= hflip ? pxl_data>>1 : pxl_data << 1;
+                pxl_data  <= hflip ? pxl_data<<1 : pxl_data>>1;
                 hotpxl    <= { hotpxl[6:0], 1'b1 };
                 if( hotpxl[7] ) begin
                     busy    <= 0; // done

@@ -49,7 +49,7 @@ wire [ 7:0] cpu_a11 = cpu_addr[8:1];
 
 assign { red, green, blue } = col_out;
 
-jtframe_dual_ram #(.aw(8),.simfile("pal_even.hex")) u_ram0(
+jtframe_dual_ram #(.aw(8),.simhexfile("pal_even.hex")) u_ram0(
     .clk0   ( clk24     ),
     .clk1   ( clk       ),
     // Port 0
@@ -64,7 +64,7 @@ jtframe_dual_ram #(.aw(8),.simfile("pal_even.hex")) u_ram0(
     .q1     ( col0_data )
 );
 
-jtframe_dual_ram #(.aw(8),.simfile("pal_odd.hex")) u_ram1(
+jtframe_dual_ram #(.aw(8),.simhexfile("pal_odd.hex")) u_ram1(
     .clk0   ( clk24     ),
     .clk1   ( clk       ),
     // Port 0
@@ -79,7 +79,11 @@ jtframe_dual_ram #(.aw(8),.simfile("pal_odd.hex")) u_ram1(
     .q1     ( col1_data )
 );
 
+`ifdef GRAY
+always @(posedge clk) if(pxl_cen) col_in <= {3{col_addr[3:0]}};
+`else
 always @(posedge clk) if(pxl_cen) col_in = { col1_data, col0_data[7:4] };
+`endif
 
 jtframe_blank #(.DLY(3),.DW(12)) u_blank(
     .clk        ( clk       ),
