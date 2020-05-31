@@ -309,7 +309,7 @@ jtframe_prom #(.dw(4),.aw(8), .simfile("a71-25.41")) u_prom(
     .q      ( dec_dout  )
 );
 
-jtframe_obj_buffer u_line(
+jtframe_obj_buffer #(.ALPHA(4'd0)) u_line(
     .clk    ( clk           ),
     .LHBL   ( LHBL          ),
     // New data writes
