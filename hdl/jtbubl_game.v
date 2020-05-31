@@ -257,8 +257,8 @@ jtframe_rom #(
     .SLOT3_DW    (  8              ),
     .SLOT3_OFFSET( SND_OFFSET      ),
 
-    .SLOT4_AW    ( 19              ), // GFX
-    .SLOT4_DW    ( 16              ),
+    .SLOT4_AW    ( 18              ), // GFX
+    .SLOT4_DW    ( 32              ),
     .SLOT4_OFFSET( GFX_OFFSET      )
 ) u_rom (
     .rst         ( rst           ),
