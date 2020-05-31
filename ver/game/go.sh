@@ -12,15 +12,19 @@ for k in $*; do
     fi
 done
 
+# Mare SDRAM file
+if [ ! -s sdram.hex ]; then
+    bin2hex < ../../rom/bublbobl.rom > sdram.hex
+fi
+
 # Find PROM file
-if [ ! -e prom.hex ]; then
+if [ ! -e a71-25.41 ]; then
     zipfile=$(locate bublbobl.zip | head -n 1)
     if [ -z "$zipfile" ]; then
-        echo "Cannot locate bublbobl.zip. Needed to generate prom.hex."
+        echo "ERROR: cannot locate bublbobl.zip. Needed to extract a71-25.41."
         exit 1
     fi
     unzip -o $zipfile a71-25.41 || exit $?
-    byte2hex < a71-25.41 > prom.hex
 fi
 
 export GAME_ROM_PATH=../../rom/bublbobl.rom

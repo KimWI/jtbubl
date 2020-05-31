@@ -72,8 +72,8 @@ module jtbubl_game(
 wire        main_cs, sub_cs, mcu_cs, snd_cs, gfx_cs;
 wire        main_ok, sub_ok, mcu_ok, snd_ok, gfx_ok;
 wire        snd_irq;
-wire [15:0] gfx_data;
-wire [18:0] gfx_addr;
+wire [31:0] gfx_data;
+wire [17:0] gfx_addr;
 
 wire [ 7:0] main_data, sub_data, mcu_data, snd_data, snd_latch;
 wire [14:0] snd_addr, sub_addr, mcu_addr;

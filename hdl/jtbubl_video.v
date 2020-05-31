@@ -146,7 +146,7 @@ jtbubl_colmix u_colmix(
     // Color address to palette
     .col_addr   ( col_addr       ),
     // CPU interface
-    .cpu_addr   ( cpu_addr[11:0] ),
+    .cpu_addr   ( cpu_addr[8:0]  ),
     .cpu_rnw    ( cpu_rnw        ),
     .cpu_dout   ( cpu_dout       ),
     .pal_cs     ( pal_cs         ),

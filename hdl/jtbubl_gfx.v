@@ -50,14 +50,12 @@ wire [ 7:0] scan0_data, scan1_data, scan2_data, scan3_data;
 wire [ 7:0] vram0_dout, vram1_dout, vram2_dout, vram3_dout;
 wire [10:0] vram_addr = cpu_addr[12:2];
 reg  [ 3:0] vram_we, cpu_cc;
-reg  [10:0] scan_addr;
 reg  [ 7:0] line_din;
 reg  [ 8:0] line_addr;
 reg         line_we;
 wire [ 3:0] dec_dout;
 wire [ 7:0] dec_addr;
 reg  [ 4:0] vn;
-reg  [ 4:0] st;
 
 always @(*) begin
     cpu_cc = 4'd0;
@@ -79,27 +77,28 @@ end
 localparam [10:0] OBJ_START = 11'h140;
 
 reg  [ 9:0] code;
-wire [10:0] obj_offset  = OBJ_START+{3'b0,objcnt};
-wire [10:0] tile_offset = {num[4:0], hn, dec_dout[1:0], vn[2:0] }; // 5+1+2+3=11
-reg         sel_obj;
-
 // Let's follow the original signal names but in lower case
 reg  [ 9:0] oa;   // VRAM address for first read (object)
 wire [11:0] sa;   // VRAM address for second read (char)
-reg  [ 7:0] vsub, sa_base;
+reg  [ 7:0] vsub, sa_base, hotpxl;
+reg  [31:0] pxl_data;
 reg  [ 8:0] hpos;
 reg  [ 3:0] bank, pal;
 wire [10:0] cbus; // address to read VRAM
-reg         ch, hflip, vflip;
+reg         ch, hflip, vflip, waitok;
 reg         last_LHBL;
 reg         busy, idle; // extra cycle to wait for memories
 
-assign cbus      = ch ? { sh[10:6],oa[0],sh[4:0] } : {1'b1, oa };
+assign cbus      = ch ? { sa[10:6],oa[0],sa[4:0] } : {1'b1, oa };
 assign rom_addr  = { bank, code, vsub[2:0]^{3{vflip}}, 1'b0 }; // 18 bits
 assign sa        = { sa_base[7]&sa_base[5], sa_base[4:0], 1'b0, dec_dout[1:0], vsub[5:3] };
 assign dec_addr  = { LVBL, sa_base[7:5], vsub[7:4] };
 
 always @(posedge clk) last_LHBL <= LHBL;
+
+`ifdef SIMULATION
+wire [1:0] phase = { ch, oa[0] };
+`endif
 
 // Collection of tile information
 always @(posedge clk, posedge rst) begin
@@ -113,8 +112,7 @@ always @(posedge clk, posedge rst) begin
         hflip   <= 0;
         vflip   <= 0;
     end else begin
-        if( !last_LHBL && LHBL ) begin // note that tile drawing is disabled if LHBL is low
-            done    <= 0;
+        if( !LHBL /*|| oa[8:1]==8'd48*/ ) begin // note that tile drawing is disabled if LHBL is low
             oa      <= 10'd0;
             ch      <= 0;
             idle    <= 0;
@@ -133,7 +131,7 @@ always @(posedge clk, posedge rst) begin
                                // too on the board via a jumper but was never used
                 end
                 2'd3: begin
-                    code <= { scan1_data[1:0], scan0_data }
+                    code <= { scan1_data[1:0], scan0_data };
                     pal  <= scan1_data[5:2];
                     hflip<= scan1_data[6];
                     vflip<= scan1_data[7];
@@ -158,13 +156,15 @@ always @(posedge clk, posedge rst) begin
         busy    <= 0;
         rom_cs  <= 0;
         line_we <= 0;
+        waitok  <= 1;
     end else begin
         if( !LHBL ) begin
             busy    <= 0;
             line_we <= 0;
             rom_cs  <= 0;            
-        end
-        if( &{ch,oa[0,idle]} & ~busy) begin
+            waitok  <= 1;
+        end else
+        if( &{ch,oa[0],idle} & ~busy) begin
             busy      <= 1;
             rom_cs    <= 1;
             waitok    <= 1;
@@ -194,7 +194,7 @@ always @(posedge clk, posedge rst) begin
     end
 end
 
-jtframe_dual_ram #(.aw(11),.simfile("vram0.hex")) u_ram0(
+jtframe_dual_ram #(.aw(11),.simhexfile("vram0.hex")) u_ram0(
     .clk0   ( clk24     ),
     .clk1   ( clk       ),
     // Port 0
@@ -204,12 +204,12 @@ jtframe_dual_ram #(.aw(11),.simfile("vram0.hex")) u_ram0(
     .q0     ( vram0_dout),
     // Port 1
     .data1  (           ),
-    .addr1  ( scan_addr ),
+    .addr1  ( cbus      ),
     .we1    ( 1'b0      ),
     .q1     ( scan0_data)
 );
 
-jtframe_dual_ram #(.aw(11),.simfile("vram1.hex")) u_ram1(
+jtframe_dual_ram #(.aw(11),.simhexfile("vram1.hex")) u_ram1(
     .clk0   ( clk24     ),
     .clk1   ( clk       ),
     // Port 0
@@ -219,12 +219,12 @@ jtframe_dual_ram #(.aw(11),.simfile("vram1.hex")) u_ram1(
     .q0     ( vram1_dout),
     // Port 1
     .data1  (           ),
-    .addr1  ( scan_addr ),
+    .addr1  ( cbus      ),
     .we1    ( 1'b0      ),
     .q1     ( scan1_data)
 );
 
-jtframe_dual_ram #(.aw(11),.simfile("vram2.hex")) u_ram2(
+jtframe_dual_ram #(.aw(11),.simhexfile("vram2.hex")) u_ram2(
     .clk0   ( clk24     ),
     .clk1   ( clk       ),
     // Port 0
@@ -234,12 +234,12 @@ jtframe_dual_ram #(.aw(11),.simfile("vram2.hex")) u_ram2(
     .q0     ( vram2_dout),
     // Port 1
     .data1  (           ),
-    .addr1  ( scan_addr ),
+    .addr1  ( cbus      ),
     .we1    ( 1'b0      ),
     .q1     ( scan2_data)
 );
 
-jtframe_dual_ram #(.aw(11),.simfile("vram3.hex")) u_ram3(
+jtframe_dual_ram #(.aw(11),.simhexfile("vram3.hex")) u_ram3(
     .clk0   ( clk24     ),
     .clk1   ( clk       ),
     // Port 0
@@ -249,12 +249,12 @@ jtframe_dual_ram #(.aw(11),.simfile("vram3.hex")) u_ram3(
     .q0     ( vram3_dout),
     // Port 1
     .data1  (           ),
-    .addr1  ( scan_addr ),
+    .addr1  ( cbus      ),
     .we1    ( 1'b0      ),
     .q1     ( scan3_data)
 );
 
-jtframe_prom #(.dw(4),.aw(8), .simfile("prom.hex")) u_prom(
+jtframe_prom #(.dw(4),.aw(8), .simfile("a71-25.41")) u_prom(
     .clk    ( clk       ),
     .cen    ( pxl2_cen  ),
     .data   ( prog_data ),

@@ -10,6 +10,7 @@
 ../../modules/jtframe/hdl/clocking/jtframe_cen48.v
 ../../modules/jtframe/hdl/ram/jtframe_dual_ram.v
 ../../modules/jtframe/hdl/ram/jtframe_prom.v
+../../modules/jtframe/hdl/ram/jtframe_obj_buffer.v
 ../../modules/jtframe/hdl/sdram/jtframe_rom.v
 ../../modules/jtframe/hdl/sdram/jtframe_romrq.v
 ../../modules/jtframe/hdl/sdram/jtframe_dwnld.v

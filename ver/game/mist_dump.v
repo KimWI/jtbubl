@@ -29,8 +29,7 @@ module mist_dump(
             `ifdef DEEPDUMP
                 $dumpvars(0,mist_test);
             `else
-                $dumpvars(1,mist_test.UUT.u_game.u_main);
-                $dumpvars(1,mist_test.frame_cnt);
+                $dumpvars(0,mist_test.UUT.u_game.u_video);
             `endif
             $dumpon;
         end
@@ -48,8 +47,7 @@ module mist_dump(
         `else
             $display("NC Verilog: will dump selected signals");
             $shm_probe(frame_cnt);
-            $shm_probe(UUT.u_game.u_prom_we,"AS");
-            $shm_probe(UUT.u_base.u_sdram,"AS");
+            $shm_probe(UUT.u_game.u_video,"AS");
         `endif
     end
 `endif
