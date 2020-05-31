@@ -216,7 +216,7 @@ always @(posedge clk, posedge rst) begin
             end else if(!waitok[1]) begin
                 if( hotpxl[0])
                     line_addr <= line_addr + 9'd1;
-                line_din  <= {pal_mux, get_pxl(pxl_data, hflip) };
+                line_din  <= {pal_mux, ~get_pxl(pxl_data, hflip) };
                 line_we   <= 1;
                 pxl_data  <= hflip ? pxl_data<<1 : pxl_data>>1;
                 hotpxl    <= { hotpxl[6:0], 1'b1 };
@@ -309,7 +309,7 @@ jtframe_prom #(.dw(4),.aw(8), .simfile("a71-25.41")) u_prom(
     .q      ( dec_dout  )
 );
 
-jtframe_obj_buffer #(.ALPHA(4'd0)) u_line(
+jtframe_obj_buffer u_line(
     .clk    ( clk           ),
     .LHBL   ( LHBL          ),
     // New data writes
