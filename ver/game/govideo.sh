@@ -32,6 +32,5 @@ head vram_odd.hex  -n  2048 > vram1.hex
 tail vram_even.hex -n  2048 > vram2.hex
 tail vram_odd.hex  -n  2048 > vram3.hex
 
-go.sh -d GFX_ONLY -d NOSOUND -d VIDEO_START=1  -w $OTHER 
-#-d GRAY
+go.sh -d GFX_ONLY -d NOSOUND -d VIDEO_START=1  -w $OTHER -d GRAY
 #-video 2
