@@ -127,7 +127,7 @@ always @(posedge clk, posedge rst) begin
             oatop   <= 1;
         end else begin
             // will need to gate for the ROM later on
-            if( !busy && |oa ) begin
+            if( !busy && |oa ) begin // the |oa limit was not on the original
                 if( {ch,oa[0],idle}==3'b011 && next ) begin
                     oa[8:1]<= oa[8:1]+8'd1;
                     { ch, oa[0], idle } <= 3'd0;
