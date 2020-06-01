@@ -152,13 +152,13 @@ always @(posedge clk, posedge rst) begin
                     bank    <= scan3_data[3:0]; // there was a provision to use bit 4
                                // too on the board via a jumper but was never used
                 end
-                2'd2: begin
+                2'd3: begin
                     code0   <= vrmux[9:0];
                     pal0    <= vrmux[13:10];
                     hflip[0]<= vrmux[14];
                     vflip[0]<= vrmux[15];                    
                 end
-                2'd3: begin
+                2'd2: begin
                     code1   <= vrmux[9:0];
                     pal1    <= vrmux[13:10];
                     hflip[1]<= vrmux[14];
@@ -216,14 +216,14 @@ always @(posedge clk, posedge rst) begin
             end else if(!waitok[1]) begin
                 if( hotpxl[0])
                     line_addr <= line_addr + 9'd1;
-                line_din  <= {pal_mux, ~get_pxl(pxl_data, hflip) };
+                line_din  <= {pal_mux, ~get_pxl(pxl_data, hf_mux) };
                 line_we   <= 1;
-                pxl_data  <= hflip ? pxl_data<<1 : pxl_data>>1;
+                pxl_data  <= hf_mux ? pxl_data<<1 : pxl_data>>1;
                 hotpxl    <= { hotpxl[6:0], 1'b1 };
                 if( hotpxl[7] ) begin
+                    line_we <= 0;
                     if( half ) begin
                         busy    <= 0; // done
-                        line_we <= 0;
                     end else begin
                         waitok <= 2'b11;
                         code_mux <= code1;

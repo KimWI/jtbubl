@@ -40,5 +40,9 @@ go.sh -d GFX_ONLY -d NOSOUND -d VIDEO_START=1 -video 2 -w \
 #-d GRAY
 
 if [ ! -z "$SCENE" ]; then
+    if [ -e $SCENE.jpg ]; then
+        mv $SCENE.jpg ${SCENE}_old.jpg
+    fi
     cp video-0.jpg $SCENE.jpg
 fi
+rm sound.raw

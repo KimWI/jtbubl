@@ -17,7 +17,6 @@
     Date: 29-05-2020 */
 
 module jtbubl_colmix(
-    input               rst,
     input               clk,
     input               clk24,
     //output              pxl2_cen,
