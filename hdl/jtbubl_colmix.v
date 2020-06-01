@@ -40,54 +40,52 @@ module jtbubl_colmix(
     output     [ 3:0]   blue
 );
 
-reg  [11:0] col_in;
-wire [11:0] col_out;
-wire [ 7:0] col0_data, col1_data;
+wire [15:0] col_out;
+wire [15:0] co_bus;
+reg  [15:0] col_in;
 wire        pal0_we = pal_cs & ~cpu_rnw & ~cpu_addr[0];
 wire        pal1_we = pal_cs & ~cpu_rnw &  cpu_addr[0];
 wire [ 7:0] cpu_a11 = cpu_addr[8:1];
 
-assign red={ col_out}
+assign red  = col_out[7:4];
+assign green= col_out[3:0];
+assign blue = col_out[15:12];
 
 jtframe_dual_ram #(.aw(8),.simhexfile("pal_even.hex")) u_ram0(
-    .clk0   ( clk24     ),
-    .clk1   ( clk       ),
+    .clk0   ( clk24        ),
+    .clk1   ( clk          ),
     // Port 0
-    .data0  ( cpu_dout  ),
-    .addr0  ( cpu_a11   ),
-    .we0    ( pal0_we   ),
-    .q0     ( pal_dout  ),
+    .data0  ( cpu_dout     ),
+    .addr0  ( cpu_a11      ),
+    .we0    ( pal0_we      ),
+    .q0     ( pal_dout     ),
     // Port 1
-    .data1  (           ),
-    .addr1  ( col_addr  ),
-    .we1    ( 1'b0      ),
-    .q1     ( col0_data )
+    .data1  (              ),
+    .addr1  ( col_addr     ),
+    .we1    ( 1'b0         ),
+    .q1     ( co_bus[7:0]  )
 );
 
 jtframe_dual_ram #(.aw(8),.simhexfile("pal_odd.hex")) u_ram1(
-    .clk0   ( clk24     ),
-    .clk1   ( clk       ),
+    .clk0   ( clk24        ),
+    .clk1   ( clk          ),
     // Port 0
-    .data0  ( cpu_dout  ),
-    .addr0  ( cpu_a11   ),
-    .we0    ( pal1_we   ),
-    .q0     ( pal_dout  ),
+    .data0  ( cpu_dout     ),
+    .addr0  ( cpu_a11      ),
+    .we0    ( pal1_we      ),
+    .q0     ( pal_dout     ),
     // Port 1
-    .data1  (           ),
-    .addr1  ( col_addr  ),
-    .we1    ( 1'b0      ),
-    .q1     ( col1_data )
+    .data1  (              ),
+    .addr1  ( col_addr     ),
+    .we1    ( 1'b0         ),
+    .q1     ( co_bus[15:8] )
 );
 
 `ifdef GRAY
 always @(posedge clk) if(pxl_cen) col_in <= {3{col_addr[3:0]}};
 `else
 always @(posedge clk) if(pxl_cen) 
-    col_in = { col1_data, col0_data };
-    //col_in = { col0_data[3:0], col0_data[7:4], col1_data[7:4] };
-    //col_in = { col0_data, col1_data[7:4] };
-    //col_in = { col0_data, col1_data[3:0] };
-    //col_in = { col1_data, col0_data[3:0] };
+    col_in = co_bus;
 `endif
 
 jtframe_blank #(.DLY(3),.DW(16)) u_blank(
@@ -98,7 +96,7 @@ jtframe_blank #(.DLY(3),.DW(16)) u_blank(
     .LHBL_dly   ( LHBL_dly  ),
     .LVBL_dly   ( LVBL_dly  ),
     .preLBL     (           ),
-    .rgb_in     ( col_in    ),
+    .rgb_in     ( co_bus    ),
     .rgb_out    ( col_out   )
 );
 

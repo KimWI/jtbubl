@@ -88,8 +88,9 @@ jtframe_cen48 u_cen(
 jtframe_vtimer #(
     .HB_START( 9'd255 ),
     .HB_END  ( 9'd383 ),
-    .VB_START( 9'd223 ),
-    .VB_END  ( 9'd263 )
+    .V_START ( 9'd016 ),
+    .VB_START( 9'd239 ),
+    .VB_END  ( 9'd279 )
 )
 u_timer(
     .clk        ( clk           ),

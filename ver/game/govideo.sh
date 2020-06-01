@@ -1,6 +1,7 @@
 #!/bin/bash
 
 OTHER=
+SCENE=
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -10,6 +11,7 @@ while [ $# -gt 0 ]; do
                 echo "Cannot find scene #" $1
                 exit 1
             fi
+            SCENE=$1
             cp scene${1}/* .;;
         *) OTHER="$OTHER $1";;
     esac
@@ -32,6 +34,11 @@ head vram_odd.hex  -n  2048 > vram1.hex
 tail vram_even.hex -n  2048 > vram2.hex
 tail vram_odd.hex  -n  2048 > vram3.hex
 
-go.sh -d GFX_ONLY -d NOSOUND -d VIDEO_START=1  -w $OTHER 
+go.sh -d GFX_ONLY -d NOSOUND -d VIDEO_START=1 -video 2 -w \
+    -d SIMULATION_VTIMER \
+    $OTHER 
 #-d GRAY
-#-video 2
+
+if [ ! -z "$SCENE" ]; then
+    cp video-0.jpg $SCENE.jpg
+fi
