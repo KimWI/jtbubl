@@ -154,16 +154,15 @@ always @(posedge clk, posedge rst) begin
                         hflip[0]<= vrmux[14];
                         vflip[0]<= vrmux[15];                    
                     end
-                    2'd3: begin // lden_b becomes available here
-                        if( lden_b ) hpos <= line_addr;
+                    2'd3: begin
                         code1   <= vrmux[9:0];
                         pal1    <= vrmux[13:10];
                         hflip[1]<= vrmux[14];
                         vflip[1]<= vrmux[15];
-                        newdata <= 1;
                     end
                 endcase
-            end else newdata <= 0;
+            end
+            newdata <= {ch, oa[0],idle}==3'b110;
         end
     end
 end
@@ -194,7 +193,7 @@ always @(posedge clk, posedge rst) begin
             busy        <= 1;
             rom_cs      <= 1;
             waitok      <= 2'b11;
-            line_addr   <= hpos;
+            if(!lden_b) line_addr <= hpos;
             line_we     <= 0;
             code_mux    <= code0;
             hf_mux      <= hflip[0];
@@ -301,7 +300,7 @@ jtframe_dual_ram #(.aw(11),.simhexfile("vram3.hex")) u_ram3(
 
 jtframe_prom #(.dw(4),.aw(8), .simfile("a71-25.41")) u_prom(
     .clk    ( clk       ),
-    .cen    ( pxl2_cen  ),
+    .cen    ( 1'b1      ),
     .data   ( prog_data ),
     .rd_addr( dec_addr  ),
     .wr_addr( prog_addr ),
