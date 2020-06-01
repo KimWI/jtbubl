@@ -68,28 +68,28 @@ Address          Dir Data     Name      Description
 11100xxxxxxxxxxx R/W xxxxxxxx WORK      RAM shared with CPU #2
 11101xxxxxxxxxxx R/W xxxxxxxx WORK      RAM shared with CPU #2
 11110xxxxxxxxxxx R/W xxxxxxxx WORK      RAM shared with CPU #2
-1111100xxxxxxxxx R/W xxxxxxxx COLOR     palette RAM
-111110100-----00   W xxxxxxxx SOUND     command for sound CPU
-111110100-----01   W --------           n.c.
-111110100-----10   W --------           n.c.
-111110100-----11   W -------x SRESET    reset sound CPU, sound chips, and sound CPU to CPU #1 semaphore
-111110100-----00 R   xxxxxxxx           answer from sound CPU (not used)
-111110100-----01 R   -------x           message pending from sound CPU to CPU #1 (not used)
-111110100-----01 R   ------x-           message pending from CPU #1 to sound CPU (not used)
-111110100-----10 R                      n.c.
-111110100-----11 R                      n.c.
-111110101-------   W -------- TRES?     watchdog reset
-1111101100------   W -------- NMIRQ     trigger NMI on CPU #2 (not used)
-1111101101------   W -----xxx           ROM bank
-1111101101------   W ----x---           n.c.
-1111101101------   W ---x---- SBRES     reset CPU #2
-1111101101------   W --x----- SEQRES    reset MCU
-1111101101------   W -x------ BLACK     blank screen
-1111101101------   W x------- VHINV     flip screen
-1111101110------   W --------           n.c.
-1111101111------   W --------           n.c.
-111110111-------   W --------           n.c.
-111111xxxxxxxxxx R/W xxxxxxxx MCRAM     RAM shared with MCU
+1111 100x xxxxxxxx R/W xxxxxxxx COLOR     palette RAM
+1111 1010 0-----00   W xxxxxxxx SOUND     command for sound CPU
+1111 1010 0-----01   W --------           n.c.
+1111 1010 0-----10   W --------           n.c.
+1111 1010 0-----11   W -------x SRESET    reset sound CPU, sound chips, and sound CPU to CPU #1 semaphore
+1111 1010 0-----00 R   xxxxxxxx           answer from sound CPU (not used)
+1111 1010 0-----01 R   -------x           message pending from sound CPU to CPU #1 (not used)
+1111 1010 0-----01 R   ------x-           message pending from CPU #1 to sound CPU (not used)
+1111 1010 0-----10 R                      n.c.
+1111 1010 0-----11 R                      n.c.
+1111 1010 1-------   W -------- TRES?     watchdog reset
+1111 1011 00------   W -------- NMIRQ     trigger NMI on CPU #2 (not used)
+1111 1011 01------   W -----xxx           ROM bank
+1111 1011 01------   W ----x---           n.c.
+1111 1011 01------   W ---x---- SBRES     reset CPU #2
+1111 1011 01------   W --x----- SEQRES    reset MCU
+1111 1011 01------   W -x------ BLACK     blank screen
+1111 1011 01------   W x------- VHINV     flip screen
+1111 1011 10------   W --------           n.c.
+1111 1011 11------   W --------           n.c.
+1111 1011 1-------   W --------           n.c.
+1111 11xx xxxxxxxx R/W xxxxxxxx MCRAM     RAM shared with MCU
 
 
 CPU #2
