@@ -94,7 +94,7 @@ reg         last_LHBL;
 reg         busy, idle; // extra cycle to wait for memories
 wire [15:0] vrmux;
 wire        lden_b, next;
-reg         half;
+reg         half, newdata;
 
 assign cbus      = ch ? { sa[10:6],oa[0],sa[4:0] } : {1'b1, oatop, oa };
 assign rom_addr  = { bank, code_mux, vsub[2:0]^{3{vf_mux}}, 1'b0 }; // 18 bits
@@ -124,47 +124,46 @@ always @(posedge clk, posedge rst) begin
         hflip   <= 2'b0;
         vflip   <= 2'b0;
         sa_base <= 8'd0;
+        newdata <= 0;
     end else begin
         if( !LHBL ) begin // note that tile drawing is disabled if LHBL is low
             oa      <= 9'h80;
             ch      <= 0;
             idle    <= 0;
             oatop   <= 1;
+            newdata <= 0;
         end else begin
-            // will need to gate for the ROM later on
-            if( !busy && oa[8:1]!=8'hE0 ) begin // the |oa limit was not on the original
-                //if( {ch,oa[0],idle}==3'b100 && next ) begin
-                //    oa[8:1]<= oa[8:1]+8'd1;
-                //    { ch, oa[0], idle } <= 3'd0;
-                //end else begin
-                    { oa[8:1], ch, oa[0], idle } <= { oa[8:1], ch, oa[0], idle } + 10'd1;
-                //end
+            if( !busy && oa[8:1]!=8'hE0 ) begin // the oa limit was not on the original
+                { oa[8:1], ch, oa[0], idle } <= { oa[8:1], ch, oa[0], idle } + 10'd1;
             end
-            if(idle) case( {ch, oa[0]} )
-                2'd0: begin
-                    vsub    <= scan2_data+vdump;
-                    sa_base <= scan3_data;
-                end
-                2'd1: begin
-                    oatop   <= ~scan3_data[7];
-                    hpos    <= {scan3_data[6], scan2_data };
-                    bank    <= scan3_data[3:0]; // there was a provision to use bit 4
-                               // too on the board via a jumper but was never used
-                end
-                2'd2: begin // lden_b becomes available here
-                    if( lden_b ) hpos <= line_addr;
-                    code0   <= vrmux[9:0];
-                    pal0    <= vrmux[13:10];
-                    hflip[0]<= vrmux[14];
-                    vflip[0]<= vrmux[15];                    
-                end
-                2'd3: begin
-                    code1   <= vrmux[9:0];
-                    pal1    <= vrmux[13:10];
-                    hflip[1]<= vrmux[14];
-                    vflip[1]<= vrmux[15];
-                end
-            endcase
+            if(idle) begin
+                case( {ch, oa[0]} )
+                    2'd0: begin
+                        vsub    <= scan2_data+vdump;
+                        sa_base <= scan3_data;
+                    end
+                    2'd1: begin
+                        oatop   <= ~scan3_data[7];
+                        hpos    <= {scan3_data[6], scan2_data };
+                        bank    <= scan3_data[3:0]; // there was a provision to use bit 4
+                                   // too on the board via a jumper but was never used
+                    end
+                    2'd2: begin
+                        code0   <= vrmux[9:0];
+                        pal0    <= vrmux[13:10];
+                        hflip[0]<= vrmux[14];
+                        vflip[0]<= vrmux[15];                    
+                    end
+                    2'd3: begin // lden_b becomes available here
+                        if( lden_b ) hpos <= line_addr;
+                        code1   <= vrmux[9:0];
+                        pal1    <= vrmux[13:10];
+                        hflip[1]<= vrmux[14];
+                        vflip[1]<= vrmux[15];
+                        newdata <= 1;
+                    end
+                endcase
+            end else newdata <= 0;
         end
     end
 end
@@ -191,11 +190,12 @@ always @(posedge clk, posedge rst) begin
             line_we <= 0;
             rom_cs  <= 0;            
         end else
-        if( &{ch,oa[0],idle} & ~busy & ~next) begin
+        if( newdata & ~next) begin
             busy        <= 1;
             rom_cs      <= 1;
             waitok      <= 2'b11;
             line_addr   <= hpos;
+            line_we     <= 0;
             code_mux    <= code0;
             hf_mux      <= hflip[0];
             vf_mux      <= vflip[0];

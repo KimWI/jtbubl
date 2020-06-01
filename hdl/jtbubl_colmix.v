@@ -87,7 +87,7 @@ always @(posedge clk) if(pxl_cen)
     col_in = co_bus;
 `endif
 
-jtframe_blank #(.DLY(3),.DW(16)) u_blank(
+jtframe_blank #(.DLY(1),.DW(16)) u_blank(
     .clk        ( clk       ),
     .pxl_cen    ( pxl_cen   ),
     .LHBL       ( LHBL      ),
