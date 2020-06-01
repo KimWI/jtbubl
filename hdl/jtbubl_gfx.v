@@ -98,7 +98,8 @@ reg         half;
 
 assign cbus      = ch ? { sa[10:6],oa[0],sa[4:0] } : {1'b1, oatop, oa };
 assign rom_addr  = { bank, code_mux, vsub[2:0]^{3{vf_mux}}, 1'b0 }; // 18 bits
-assign sa        = { sa_base[7]&sa_base[5], sa_base[4:0], 1'b1, dec_dout[1:0], vsub[5:3] };
+assign sa        = { sa_base[7]&sa_base[5], sa_base[4:0], 1'b1 /*unused bit*/, 
+                     dec_dout[1:0], vsub[5:3] };
 assign dec_addr  = { LVBL, sa_base[7:5], vsub[7:4] };
 assign vrmux     = sa[11] ? {scan3_data, scan2_data} : {scan1_data, scan0_data};
 assign lden_b    = dec_dout[2];
@@ -124,20 +125,20 @@ always @(posedge clk, posedge rst) begin
         vflip   <= 2'b0;
         sa_base <= 8'd0;
     end else begin
-        if( !LHBL /*|| oa[8:1]==8'h70*/ ) begin // note that tile drawing is disabled if LHBL is low
+        if( !LHBL ) begin // note that tile drawing is disabled if LHBL is low
             oa      <= 9'h80;
             ch      <= 0;
             idle    <= 0;
             oatop   <= 1;
         end else begin
             // will need to gate for the ROM later on
-            if( !busy && |oa ) begin // the |oa limit was not on the original
-                if( {ch,oa[0],idle}==3'b011 && next ) begin
-                    oa[8:1]<= oa[8:1]+8'd1;
-                    { ch, oa[0], idle } <= 3'd0;
-                end else begin
+            if( !busy && oa[8:1]!=8'hE0 ) begin // the |oa limit was not on the original
+                //if( {ch,oa[0],idle}==3'b100 && next ) begin
+                //    oa[8:1]<= oa[8:1]+8'd1;
+                //    { ch, oa[0], idle } <= 3'd0;
+                //end else begin
                     { oa[8:1], ch, oa[0], idle } <= { oa[8:1], ch, oa[0], idle } + 10'd1;
-                end
+                //end
             end
             if(idle) case( {ch, oa[0]} )
                 2'd0: begin
@@ -146,19 +147,18 @@ always @(posedge clk, posedge rst) begin
                 end
                 2'd1: begin
                     oatop   <= ~scan3_data[7];
-                    hpos    <= lden_b ? 
-                        line_addr : 
-                        {scan3_data[6], scan2_data };
+                    hpos    <= {scan3_data[6], scan2_data };
                     bank    <= scan3_data[3:0]; // there was a provision to use bit 4
                                // too on the board via a jumper but was never used
                 end
-                2'd3: begin
+                2'd2: begin // lden_b becomes available here
+                    if( lden_b ) hpos <= line_addr;
                     code0   <= vrmux[9:0];
                     pal0    <= vrmux[13:10];
                     hflip[0]<= vrmux[14];
                     vflip[0]<= vrmux[15];                    
                 end
-                2'd2: begin
+                2'd3: begin
                     code1   <= vrmux[9:0];
                     pal1    <= vrmux[13:10];
                     hflip[1]<= vrmux[14];
@@ -191,7 +191,7 @@ always @(posedge clk, posedge rst) begin
             line_we <= 0;
             rom_cs  <= 0;            
         end else
-        if( &{ch,oa[0],idle} & ~busy) begin
+        if( &{ch,oa[0],idle} & ~busy & ~next) begin
             busy        <= 1;
             rom_cs      <= 1;
             waitok      <= 2'b11;
