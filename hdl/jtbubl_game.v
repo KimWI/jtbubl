@@ -71,7 +71,7 @@ module jtbubl_game(
 
 wire        main_cs, sub_cs, mcu_cs, snd_cs, gfx_cs;
 wire        main_ok, sub_ok, mcu_ok, snd_ok, gfx_ok;
-wire        snd_irq;
+wire        snd_irq, black_n, flip;
 wire [31:0] gfx_data;
 wire [17:0] gfx_addr;
 
@@ -90,7 +90,9 @@ wire [ 7:0] vram_dout, pal_dout, cpu_dout;
 
 assign prog_rd    = 0;
 assign dwnld_busy = downloading;
-assign { dipsw_b, dipsw_a } = dipsw[19:0];
+assign { dipsw_b, dipsw_a }   = dipsw[15:0];
+assign dip_flip               = flip;
+assign { LHBL_dly, LVBL_dly } = { LHBL, LVBL };
 
 localparam [24:0] SUB_OFFSET = 25'h2_8000 >> 1;
 localparam [24:0] SND_OFFSET = 25'h3_0000 >> 1;
@@ -131,18 +133,23 @@ u_dwnld(
 
 `ifndef NOMAIN
 jtbubl_main u_main(
-    .clk            ( clk24         ),        // 24 MHz
     .rst            ( rst           ),
-    .cen12          ( cen12         ),
-    .cpu_cen        ( cpu_cen       ),
+    .clk            ( clk24         ),        // 24 MHz
+    .cen6           ( cen6          ),
+    //.cpu_cen        ( cpu_cen       ),
     // communication with main CPU
-    .snd_irq        ( snd_irq       ),
-    .snd_latch      ( snd_latch     ),
-    // ROM
-    .rom_addr       ( main_addr     ),
-    .rom_cs         ( main_cs       ),
-    .rom_data       ( main_data     ),
-    .rom_ok         ( main_ok       ),
+    // .snd_irq        ( snd_irq       ),
+    // .snd_latch      ( snd_latch     ),
+    // Main CPU ROM
+    .main_rom_addr  ( main_addr     ),
+    .main_rom_cs    ( main_cs       ),
+    .main_rom_ok    ( main_data     ),
+    .main_rom_data  ( main_ok       ),    
+    // Sub CPU ROM
+    .sub_rom_addr   ( sub_addr      ),
+    .sub_rom_cs     ( sub_cs        ),
+    .sub_rom_ok     ( sub_data      ),
+    .sub_rom_data   ( sub_ok        ),
     // cabinet I/O
     .start_button   ( start_button  ),
     .coin_input     ( coin_input    ),
@@ -150,19 +157,16 @@ jtbubl_main u_main(
     .joystick2      ( joystick2     ),
     .service        ( 1'b1          ),
     // GFX
+    .LVBL           ( LVBL          ),
+    .flip           ( flip          ),
     .cpu_addr       ( cpu_addr      ),
     .cpu_dout       ( cpu_dout      ),
     .cpu_rnw        ( cpu_rnw       ),
-    .gfx_irqn       ( cpu_irqn      ),
-    .gfx_vram_cs    ( gfx_vram_cs   ),
-    .gfx2_vram_cs   ( gfx2_vram_cs  ),
-    .gfx_cfg_cs     ( gfx_cfg_cs    ),
-    .gfx2_cfg_cs    ( gfx2_cfg_cs   ),
+    .vram_cs        ( vram_cs       ),
+    .vram_dout      ( vram_dout     ),
     .pal_cs         ( pal_cs        ),
-
-    .gfx_dout      ( gfx_dout     ),
-    .gfx2_dout      ( gfx2_dout     ),
     .pal_dout       ( pal_dout      ),
+
     // DIP switches
     .dip_pause      ( dip_pause     ),
     .dipsw_a        ( dipsw_a       ),
@@ -184,11 +188,9 @@ jtbubl_video u_video(
     .pxl_cen        ( pxl_cen       ),
     .LHBL           ( LHBL          ),
     .LVBL           ( LVBL          ),
-    .LHBL_dly       ( LHBL_dly      ),
-    .LVBL_dly       ( LVBL_dly      ),
     .HS             ( HS            ),
     .VS             ( VS            ),
-    .flip           ( dip_flip      ),
+    .flip           ( flip          ),
     .dip_pause      ( dip_pause     ),
     .start_button   ( &start_button ),
     // PROMs
@@ -205,6 +207,7 @@ jtbubl_video u_video(
     .cpu_dout       ( cpu_dout      ),
     .vram_dout      ( vram_dout     ),
     .pal_dout       ( pal_dout      ),
+    .black_n        ( black_n       ),
     // SDRAM
     .rom_addr       ( gfx_addr      ),
     .rom_data       ( gfx_data      ),

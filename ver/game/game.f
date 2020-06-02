@@ -2,6 +2,7 @@
 ../../hdl/jtbubl_video.v
 ../../hdl/jtbubl_gfx.v
 ../../hdl/jtbubl_colmix.v
+../../hdl/jtbubl_main.v
 
 ../../modules/jtframe/hdl/video/jtframe_vtimer.v
 ../../modules/jtframe/hdl/video/jtframe_blank.v
@@ -14,3 +15,4 @@
 ../../modules/jtframe/hdl/sdram/jtframe_rom.v
 ../../modules/jtframe/hdl/sdram/jtframe_romrq.v
 ../../modules/jtframe/hdl/sdram/jtframe_dwnld.v
+../../modules/jtframe/hdl/jtframe_z80wait.v

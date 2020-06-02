@@ -32,7 +32,8 @@ module jtbubl_colmix(
     output     [ 7:0]   pal_dout,
     input               cpu_rnw,
     input      [ 8:0]   cpu_addr,
-    input      [ 7:0]   cpu_dout,    
+    input      [ 7:0]   cpu_dout,
+    input               black_n,    
     // Colours
     output     [ 3:0]   red,
     output     [ 3:0]   green,
@@ -81,10 +82,10 @@ jtframe_dual_ram #(.aw(8),.simhexfile("pal_odd.hex")) u_ram1(
 );
 
 `ifdef GRAY
-always @(posedge clk) if(pxl_cen) col_in <= {3{col_addr[3:0]}};
+always @(posedge clk) if(pxl_cen) col_in <= {4{col_addr[3:0]}};
 `else
 always @(posedge clk) if(pxl_cen) 
-    col_in = co_bus;
+    col_in = co_bus & {16{black_n}};
 `endif
 
 jtframe_blank #(.DLY(1),.DW(16)) u_blank(

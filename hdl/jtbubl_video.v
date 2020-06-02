@@ -24,8 +24,6 @@ module jtbubl_video(
     output              pxl_cen,
     output              LHBL,
     output              LVBL,
-    output              LHBL_dly,
-    output              LVBL_dly,
     output              HS,
     output              VS,
     output              flip,
@@ -36,14 +34,9 @@ module jtbubl_video(
     input      [ 3:0]   prog_data,
     input               prom_we,
     // CPU      interface
-    /*
-    input               gfx1_vram_cs,
-    input               gfx2_vram_cs,
-    input               gfx1_cfg_cs,
-    input               gfx2_cfg_cs,
-    */
     input               pal_cs,
     output     [ 7:0]   pal_dout,
+    input               black_n,
     input               cpu_rnw,
     input               cpu_cen,
     input      [12:0]   cpu_addr,
@@ -66,6 +59,7 @@ module jtbubl_video(
 
 wire [ 8:0] vrender, vrender1, vdump, hdump;
 wire [ 7:0] col_addr;
+wire        preLHBL, preLVBL;
 
 jtframe_cen48 u_cen(
     .clk        ( clk       ),    // 48 MHz
@@ -101,8 +95,8 @@ u_timer(
     .H          ( hdump         ),
     .Hinit      (               ),
     .Vinit      (               ),
-    .LHBL       ( LHBL          ),
-    .LVBL       ( LVBL          ),
+    .LHBL       ( preLHBL       ),
+    .LVBL       ( preLVBL       ),
     .HS         ( HS            ),
     .VS         ( VS            )
 );
@@ -117,8 +111,8 @@ jtbubl_gfx u_gfx(
     .prog_data  ( prog_data      ),
     .prom_we    ( prom_we        ),
     // Screen
-    .LHBL       ( LHBL           ),
-    .LVBL       ( LVBL           ),
+    .LHBL       ( preLHBL        ),
+    .LVBL       ( preLVBL        ),
     .vdump      ( vdump[7:0]     ),
     .hdump      ( hdump          ),
     // CPU interface
@@ -142,11 +136,11 @@ jtbubl_colmix u_colmix(
     .clk24      ( clk24          ),
     .pxl_cen    ( pxl_cen        ),
     // Screen
-    .LHBL       ( LHBL           ),
-    .LVBL       ( LVBL           ),
-    .LHBL_dly   ( LHBL_dly       ),
-    .LVBL_dly   ( LVBL_dly       ),
-    // Color address to palette
+    .LHBL       ( preLHBL        ),
+    .LVBL       ( preLVBL        ),
+    .LHBL_dly   ( LHBL           ),
+    .LVBL_dly   ( LVBL           ),
+    // Colour address to palette
     .col_addr   ( col_addr       ),
     // CPU interface
     .cpu_addr   ( cpu_addr[8:0]  ),
@@ -154,6 +148,8 @@ jtbubl_colmix u_colmix(
     .cpu_dout   ( cpu_dout       ),
     .pal_cs     ( pal_cs         ),
     .pal_dout   ( pal_dout       ),
+    .black_n    ( black_n        ),
+    // Colour output
     .red        ( red            ),
     .green      ( green          ),
     .blue       ( blue           )    

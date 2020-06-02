@@ -17,17 +17,30 @@
     Date: 1-06-2020 */
 
 module jtbubl_main(
+    input               rst,
     input               clk24,
+    input               cen6,
+
+    // Cabinet inputs
+    input      [ 1:0]   start_button,
+    input      [ 1:0]   coin_input,
+    input      [ 5:0]   joystick1,
+    input      [ 5:0]   joystick2,
 
     // Video interface
     output reg          vram_cs,
     output reg          pal_cs,
     output reg          black_n,
     output reg          flip,
+    output     [12:0]   cpu_addr,
+    output     [ 7:0]   cpu_dout,
+    input      [ 7:0]   vram_dout,
+    input      [ 7:0]   pal_dout,
+    input               LVBL,
 
     // Sound interface
-    input      [ 7:0]   snd_reply,
-    ouput reg  [ 7:0]   snd_cmd,
+    // input      [ 7:0]   snd_reply,
+    // ouput reg  [ 7:0]   snd_cmd,
 
     // Main CPU ROM interface
     output     [17:0]   main_rom_addr,
@@ -40,10 +53,16 @@ module jtbubl_main(
     output reg          sub_rom_cs,
     input               sub_rom_ok,
     input      [ 7:0]   sub_rom_data,
+
+    // DIP switches
+    input               dip_pause,
+    input      [ 7:0]   dipsw_a,
+    input      [ 7:0]   dipsw_b
 );
 
 reg  [ 7:0] main_din, sub_din;
-wire [ 7:0] ram2main, ram2sub, main_dout, sub_dout;
+wire [ 7:0] ram2main, ram2sub, main_dout, sub_dout,
+            rammcu2main, rammcu2mcu;
 wire [15:0] main_addr, sub_addr;
 wire        main_mreq_n, main_iorq_n, main_rd_n, main_wr_n, main_rfsh_n;
 wire        sub_mreq_n,  sub_iorq_n,  sub_rd_n,  sub_wr_n;
@@ -51,6 +70,8 @@ reg         main_sub_cs, main_mcu_cs, // shared memories
             tres_cs,  // watchdog reset
             main2sub_nmi_n,
             misc_cs;
+reg         sub_main_cs;
+wire        sub_we, main_we, mainmcu_we, sub_int_n;
 reg  [ 2:0] bank;
 reg         sub_rst_n, mcu_rst_n;
 
@@ -58,6 +79,11 @@ assign      main_rom_addr = main_addr[15] ?
                         { { {1'b0, bank}+4'b10} , main_addr[13:0] } : // banked
                         { 3'd0, main_addr[14:0] }; // not banked
 assign      sub_rom_addr = sub_addr[14:0];
+assign      main_we      = main_sub_cs && !main_wr_n;
+assign      mainmcu_we   = main_mcu_cs && !main_wr_n;
+assign      sub_we       = sub_main_cs && !sub_wr_n;
+assign      cpu_addr     = main_addr[12:0];
+assign      cpu_dout     = main_dout;
 
 // Main CPU address decoder
 always @(*) begin
@@ -69,7 +95,30 @@ always @(*) begin
     tres_cs        = !mreq_n && main_addr[15: 8]==8'hFA && main_addr[7];
     main2sub_nmi_n = !mreq_n && main_addr[15: 8]==8'hFA && main_addr[7:6]==2'b00;
     misc_cs        = !mreq_n && main_addr[15: 8]==8'hFA && main_addr[7:6]==2'b01;
-    main_mcu_cs    = !mreq_n && main_addr[15:10]==6'b1111_11
+    main_mcu_cs    = !mreq_n && main_addr[15:10]==6'b1111_11;
+end
+
+// Main CPU input mux
+always @(*) begin
+    main_din = 
+        main_rom_cs ? main_rom_data : (
+        vram_cs     ? vram_dout     : (
+        pal_cs      ? pal_dout      : (
+        main_sub_cs ? ram2main      : (
+        main_mcu_cs ? rammcu2main   : 8'hff
+        ))));
+end
+
+// Sub CPU address decoder
+always @(*) begin
+    sub_rom_cs     = !mreq_n && !main_addr[15];
+    sub_main_cs    = !mreq_n && main_addr[15:13]==3'b111;
+end
+
+// Sub CPU input mux
+always @(*) begin
+    sub_din = sub_rom_cs  ? sub_rom_data : (
+              sub_main_cs ? ram2sub : 8'hff );
 end
 
 always @(posedge clk24 ) begin
@@ -91,7 +140,7 @@ end
 // Watchdog triggers after 256 frames
 
 // Time shared
-jtframe_dual_ram #(.aw(13)) u_shared(
+jtframe_dual_ram #(.aw(13)) u_subshared(
     .clk0   ( clk24           ),
     .clk1   ( clk24           ),
     // Port 0
@@ -101,7 +150,7 @@ jtframe_dual_ram #(.aw(13)) u_shared(
     .q0     ( ram2main        ),
     // Port 1
     .data1  ( sub_dout        ),
-    .addr1  ( sub_addr        ),
+    .addr1  ( sub_addr[12:0]  ),
     .we1    ( sub_we          ),
     .q1     ( ram2sub         )
 );
@@ -149,7 +198,7 @@ jtframe_z80 u_subcpu(
     .clk      ( clk24          ),
     .cen      ( cen6           ),
     .wait_n   ( sub_wait_n     ),
-    .int_n    ( 1'b1           ),
+    .int_n    ( sub_int_n      ),
     .nmi_n    ( main2sub_nmi_n ),
     .busrq_n  ( 1'b1           ),
     .m1_n     (                ),
@@ -174,6 +223,37 @@ jtframe_rom_wait u_subwait(
     // manage access to ROM data from SDRAM
     .rom_cs   ( sub_rom_cs      ),
     .rom_ok   ( sub_rom_ok      )
+);
+
+jtframe_ff u_subint(
+    .rst    ( rst           ),
+    .clk    ( clk           ),
+    .cen    ( 1'b1          ),
+    .din    ( 1'b1          ),
+    .q      (               ),
+    .qn     ( sub_int_n     ),
+    .set    ( 1'b0          ),
+    .clr    ( ~sub_iorq_n   ),
+    .sigedge( ~LVBL         ) 
+);
+
+/////////////////////////////////////////
+// MCU
+
+// Time shared
+jtframe_dual_ram #(.aw(11)) u_mcushared(
+    .clk0   ( clk24           ),
+    .clk1   ( clk24           ),
+    // Port 0
+    .data0  ( main_dout       ),
+    .addr0  ( main_addr[10:0] ),
+    .we0    ( mainmcu_we      ),
+    .q0     ( rammcu2main     ),
+    // Port 1
+    .data1  (                 ),
+    .addr1  (                 ),
+    .we1    (                 ),
+    .q1     ( rammcu2mcu      )
 );
 
 endmodule
