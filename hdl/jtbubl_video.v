@@ -102,6 +102,7 @@ u_timer(
 );
 
 jtbubl_gfx u_gfx(
+    .rst        ( rst            ),
     .clk        ( clk            ),
     .clk24      ( clk24          ),
     .pxl_cen    ( pxl_cen        ),

@@ -34,13 +34,14 @@ module jtbubl_main(
     output reg          flip,
     output     [12:0]   cpu_addr,
     output     [ 7:0]   cpu_dout,
+    output              cpu_rnw,
     input      [ 7:0]   vram_dout,
     input      [ 7:0]   pal_dout,
     input               LVBL,
 
     // Sound interface
     // input      [ 7:0]   snd_reply,
-    // ouput reg  [ 7:0]   snd_cmd,
+    output reg [ 7:0]   snd_latch,
 
     // Main CPU ROM interface
     output     [17:0]   main_rom_addr,
@@ -69,11 +70,13 @@ wire        sub_mreq_n,  sub_iorq_n,  sub_rd_n,  sub_wr_n;
 reg         main_sub_cs, main_mcu_cs, // shared memories
             tres_cs,  // watchdog reset
             main2sub_nmi_n,
-            misc_cs;
+            misc_cs, sound_cs;
 reg         sub_main_cs;
-wire        sub_we, main_we, mainmcu_we, sub_int_n;
+wire        sub_we, main_we, mainmcu_we, sub_int_n, mcu2main_int_n;
 reg  [ 2:0] bank;
-reg         sub_rst_n, mcu_rst_n;
+reg         main_rst_n, sub_rst_n, mcu_rst_n;
+reg  [ 7:0] wdog_cnt;
+reg         last_LVBL;
 
 assign      main_rom_addr = main_addr[15] ?
                         { { {1'b0, bank}+4'b10} , main_addr[13:0] } : // banked
@@ -84,18 +87,34 @@ assign      mainmcu_we   = main_mcu_cs && !main_wr_n;
 assign      sub_we       = sub_main_cs && !sub_wr_n;
 assign      cpu_addr     = main_addr[12:0];
 assign      cpu_dout     = main_dout;
+assign      cpu_rnw      = main_wr_n;
+assign      mcu2main_int_n = 1;
+
+// Watchdog and main CPU reset
+always @(posedge clk24, posedge rst) begin
+    if( rst ) begin
+        main_rst_n <= 0;
+        wdog_cnt   <= 8'd0;
+    end else begin
+        last_LVBL  <= LVBL;
+        if( tres_cs )
+            wdog_cnt <= 8'd0;
+        else if( LVBL && !last_LVBL ) wdog_cnt <= wdog_cnt + 8'd1;
+        main_rst_n <= ~wdog_cnt[7];
+    end
+end
 
 // Main CPU address decoder
 always @(*) begin
-    main_rom_cs    = !mreq_n && (!main_addr[15] || main_addr[15:14]==2'b10);
-    vram_cs        = !mreq_n && main_addr[15:13]==3'b110;
-    main_sub_cs    = !mreq_n && main_addr[15:13]==3'b111 && main_addr[12:11]!=2'b11;
-    pal_cs         = !mreq_n && main_addr[15: 9]==7'b1111_100;
-    sound_cs       = !mreq_n && main_addr[15: 8]==8'hFA && !main_addr[7];
-    tres_cs        = !mreq_n && main_addr[15: 8]==8'hFA && main_addr[7];
-    main2sub_nmi_n = !mreq_n && main_addr[15: 8]==8'hFA && main_addr[7:6]==2'b00;
-    misc_cs        = !mreq_n && main_addr[15: 8]==8'hFA && main_addr[7:6]==2'b01;
-    main_mcu_cs    = !mreq_n && main_addr[15:10]==6'b1111_11;
+    main_rom_cs    = !main_mreq_n && (!main_addr[15] || main_addr[15:14]==2'b10);
+    vram_cs        = !main_mreq_n && main_addr[15:13]==3'b110;
+    main_sub_cs    = !main_mreq_n && main_addr[15:13]==3'b111 && main_addr[12:11]!=2'b11;
+    pal_cs         = !main_mreq_n && main_addr[15: 9]==7'b1111_100;
+    sound_cs       = !main_mreq_n && main_addr[15: 8]==8'hFA && !main_addr[7];
+    tres_cs        = !main_mreq_n && main_addr[15: 8]==8'hFA && main_addr[7] && !main_wr_n;
+    main2sub_nmi_n = !(!main_mreq_n && main_addr[15: 8]==8'hFB && main_addr[7:6]==2'b00);
+    misc_cs        = !main_mreq_n && main_addr[15: 8]==8'hFB && main_addr[7:6]==2'b01;
+    main_mcu_cs    = !main_mreq_n && main_addr[15:10]==6'b1111_11;
 end
 
 // Main CPU input mux
@@ -109,18 +128,7 @@ always @(*) begin
         ))));
 end
 
-// Sub CPU address decoder
-always @(*) begin
-    sub_rom_cs     = !mreq_n && !main_addr[15];
-    sub_main_cs    = !mreq_n && main_addr[15:13]==3'b111;
-end
-
-// Sub CPU input mux
-always @(*) begin
-    sub_din = sub_rom_cs  ? sub_rom_data : (
-              sub_main_cs ? ram2sub : 8'hff );
-end
-
+// Main CPU miscellaneous control bits
 always @(posedge clk24 ) begin
     if( !main_rst_n ) begin
         bank      <= 3'd0;
@@ -128,7 +136,7 @@ always @(posedge clk24 ) begin
         mcu_rst_n <= 0;
         black_n   <= 0;
         flip      <= 0;
-    end else begin
+    end else if(misc_cs) begin
         bank      <= cpu_dout[2:0];
         sub_rst_n <= cpu_dout[4];
         mcu_rst_n <= cpu_dout[5];
@@ -137,7 +145,27 @@ always @(posedge clk24 ) begin
     end
 end
 
-// Watchdog triggers after 256 frames
+// Communication with sound CPU
+always @(posedge clk24 ) begin
+    if( !main_rst_n ) begin
+        snd_latch <= 8'd0;
+    end else if(sound_cs) begin
+        if( !main_wr_n )
+            snd_latch <= main_dout;
+    end
+end
+
+// Sub CPU address decoder
+always @(*) begin
+    sub_rom_cs     = !sub_mreq_n && !sub_addr[15];
+    sub_main_cs    = !sub_mreq_n &&  sub_addr[15:13]==3'b111;
+end
+
+// Sub CPU input mux
+always @(*) begin
+    sub_din = sub_rom_cs  ? sub_rom_data : (
+              sub_main_cs ? ram2sub : 8'hff );
+end
 
 // Time shared
 jtframe_dual_ram #(.aw(13)) u_subshared(
@@ -227,7 +255,7 @@ jtframe_rom_wait u_subwait(
 
 jtframe_ff u_subint(
     .rst    ( rst           ),
-    .clk    ( clk           ),
+    .clk    ( clk24         ),
     .cen    ( 1'b1          ),
     .din    ( 1'b1          ),
     .q      (               ),

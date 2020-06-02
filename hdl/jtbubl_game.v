@@ -78,7 +78,7 @@ wire [17:0] gfx_addr;
 wire [ 7:0] main_data, sub_data, mcu_data, snd_data, snd_latch;
 wire [14:0] snd_addr, sub_addr, mcu_addr;
 wire [17:0] main_addr;
-wire        cen12, prom_we;
+wire        cen12, cen6, prom_we;
 
 wire [ 7:0] dipsw_a, dipsw_b;
 wire        LHBL, LVBL;
@@ -103,7 +103,7 @@ localparam [24:0] PROM_START = 25'hC_0000;
 jtframe_cen24 u_cen(
     .clk        ( clk24         ),    // 24 MHz
     .cen12      ( cen12         ),
-    .cen6       (               ),
+    .cen6       ( cen6          ),
     .cen4       (               ),
     .cen3       (               ),
     .cen3q      (               ), // 1/4 advanced with respect to cen3
@@ -134,7 +134,7 @@ u_dwnld(
 `ifndef NOMAIN
 jtbubl_main u_main(
     .rst            ( rst           ),
-    .clk            ( clk24         ),        // 24 MHz
+    .clk24          ( clk24         ),        // 24 MHz
     .cen6           ( cen6          ),
     //.cpu_cen        ( cpu_cen       ),
     // communication with main CPU
@@ -143,22 +143,25 @@ jtbubl_main u_main(
     // Main CPU ROM
     .main_rom_addr  ( main_addr     ),
     .main_rom_cs    ( main_cs       ),
-    .main_rom_ok    ( main_data     ),
-    .main_rom_data  ( main_ok       ),    
+    .main_rom_ok    ( main_ok       ),
+    .main_rom_data  ( main_data     ),    
     // Sub CPU ROM
     .sub_rom_addr   ( sub_addr      ),
     .sub_rom_cs     ( sub_cs        ),
-    .sub_rom_ok     ( sub_data      ),
-    .sub_rom_data   ( sub_ok        ),
+    .sub_rom_ok     ( sub_ok        ),
+    .sub_rom_data   ( sub_data      ),
+    // Sound
+    .snd_latch      ( snd_latch     ),
     // cabinet I/O
     .start_button   ( start_button  ),
     .coin_input     ( coin_input    ),
     .joystick1      ( joystick1     ),
     .joystick2      ( joystick2     ),
-    .service        ( 1'b1          ),
-    // GFX
+    //.service        ( 1'b1          ),
+    // Video
     .LVBL           ( LVBL          ),
     .flip           ( flip          ),
+    .black_n        ( black_n       ),
     .cpu_addr       ( cpu_addr      ),
     .cpu_dout       ( cpu_dout      ),
     .cpu_rnw        ( cpu_rnw       ),
@@ -248,7 +251,6 @@ assign snd_right= 16'd0;
 assign sample   = 0;
 `endif
 
-assign sub_cs = 0;
 assign mcu_cs = 0;
 
 jtframe_rom #(
