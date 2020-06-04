@@ -7,6 +7,7 @@
 ../../modules/jtframe/hdl/video/jtframe_vtimer.v
 ../../modules/jtframe/hdl/video/jtframe_blank.v
 ../../modules/jtframe/hdl/cpu/jtframe_z80.v
+../../modules/jtframe/hdl/cpu/jtframe_6801mcu.v
 ../../modules/jtframe/hdl/jtframe_sh.v
 ../../modules/jtframe/hdl/clocking/jtframe_cen24.v
 ../../modules/jtframe/hdl/clocking/jtframe_cen48.v
@@ -19,3 +20,4 @@
 ../../modules/jtframe/hdl/sdram/jtframe_dwnld.v
 ../../modules/jtframe/hdl/jtframe_z80wait.v
 ../../modules/jtframe/hdl/jtframe_ff.v
+../../modules/jtframe/hdl/sdram/jtframe_gatecen.v

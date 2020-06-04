@@ -76,7 +76,8 @@ wire [31:0] gfx_data;
 wire [17:0] gfx_addr;
 
 wire [ 7:0] main_data, sub_data, mcu_data, snd_data, snd_latch;
-wire [14:0] snd_addr, sub_addr, mcu_addr;
+wire [14:0] snd_addr, sub_addr;
+wire [11:0] mcu_addr;
 wire [17:0] main_addr;
 wire        cen12, cen6, prom_we;
 
@@ -150,6 +151,12 @@ jtbubl_main u_main(
     .sub_rom_cs     ( sub_cs        ),
     .sub_rom_ok     ( sub_ok        ),
     .sub_rom_data   ( sub_data      ),
+    // MCU ROM
+    .mcu_rom_addr   ( mcu_addr      ),
+    .mcu_rom_cs     ( mcu_cs        ),
+    .mcu_rom_ok     ( mcu_ok        ),
+    .mcu_rom_data   ( mcu_data      ),
+
     // Sound
     .snd_latch      ( snd_latch     ),
     // cabinet I/O
@@ -251,8 +258,6 @@ assign snd_right= 16'd0;
 assign sample   = 0;
 `endif
 
-assign mcu_cs = 0;
-
 jtframe_rom #(
     .SLOT0_AW    ( 18              ),
     .SLOT0_DW    (  8              ),
@@ -262,7 +267,7 @@ jtframe_rom #(
     .SLOT1_DW    (  8              ),
     .SLOT1_OFFSET(  SUB_OFFSET     ), // Sub
 
-    .SLOT2_AW    ( 15              ),
+    .SLOT2_AW    ( 12              ),
     .SLOT2_DW    (  8              ),
     .SLOT2_OFFSET(  MCU_OFFSET     ), // MCU
 

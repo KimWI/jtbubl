@@ -34,6 +34,7 @@ export MEM_CHECK_TIME=310_000_000
 GAME_ROM_LEN=$(stat -c%s $GAME_ROM_PATH)
 export YM2203=1
 export Z80=1
+export M6801=1
 
 if [ ! -e $GAME_ROM_PATH ]; then
     echo Missing file $GAME_ROM_PATH

@@ -55,6 +55,12 @@ module jtbubl_main(
     input               sub_rom_ok,
     input      [ 7:0]   sub_rom_data,
 
+    // MCU ROM interface
+    output     [11:0]   mcu_rom_addr,
+    output reg          mcu_rom_cs,
+    input               mcu_rom_ok,
+    input      [ 7:0]   mcu_rom_data,
+
     // DIP switches
     input               dip_pause,
     input      [ 7:0]   dipsw_a,
@@ -62,19 +68,21 @@ module jtbubl_main(
 );
 
 reg  [ 7:0] main_din, sub_din;
-wire [ 7:0] ram2main, ram2sub, main_dout, sub_dout,
-            rammcu2main, rammcu2mcu;
-wire [15:0] main_addr, sub_addr;
-wire        main_mreq_n, main_iorq_n, main_rd_n, main_wr_n, main_rfsh_n;
-wire        sub_mreq_n,  sub_iorq_n,  sub_rd_n,  sub_wr_n;
+wire [ 7:0] ram2main, ram2sub, main_dout, sub_dout, mcu_dout,
+            rammcu2main, rammcu2mcu,
+            p1_in, p1_out;
+wire [15:0] main_addr, sub_addr, mcu_addr;
+wire        main_mreq_n, main_iorq_n, main_rd_n, main_wrn, main_rfsh_n;
+wire        sub_mreq_n,  sub_iorq_n,  sub_rd_n,  sub_wrn, mcu_wrn;
 reg         main_sub_cs, main_mcu_cs, // shared memories
             tres_cs,  // watchdog reset
-            main2sub_nmi_n,
+            main2sub_nmi,
             misc_cs, sound_cs;
 reg         sub_main_cs;
-wire        sub_we, main_we, mainmcu_we, sub_int_n, mcu2main_int_n;
+wire        sub_we, main_we, mainmcu_we, sub_int_n, mcu2main_int_n,
+            mcu_vma;
 reg  [ 2:0] bank;
-reg         main_rst_n, sub_rst_n, mcu_rst_n;
+reg         main_rst_n, sub_rst_n, mcu_rst;
 reg  [ 7:0] wdog_cnt;
 reg         last_LVBL;
 
@@ -82,13 +90,15 @@ assign      main_rom_addr = main_addr[15] ?
                         { { {1'b0, bank}+4'b10} , main_addr[13:0] } : // banked
                         { 3'd0, main_addr[14:0] }; // not banked
 assign      sub_rom_addr = sub_addr[14:0];
-assign      main_we      = main_sub_cs && !main_wr_n;
-assign      mainmcu_we   = main_mcu_cs && !main_wr_n;
-assign      sub_we       = sub_main_cs && !sub_wr_n;
+assign      main_we      = main_sub_cs && !main_wrn;
+assign      mainmcu_we   = main_mcu_cs && !main_wrn;
+assign      sub_we       = sub_main_cs && !sub_wrn;
 assign      cpu_addr     = main_addr[12:0];
 assign      cpu_dout     = main_dout;
-assign      cpu_rnw      = main_wr_n;
+assign      cpu_rnw      = main_wrn;
 assign      mcu2main_int_n = 1;
+assign      p1_in[3:2]   = coin_input;
+assign      p1_in[1:0]   = 2'b11;
 
 // Watchdog and main CPU reset
 always @(posedge clk24, posedge rst) begin
@@ -111,8 +121,8 @@ always @(*) begin
     main_sub_cs    = !main_mreq_n && main_addr[15:13]==3'b111 && main_addr[12:11]!=2'b11;
     pal_cs         = !main_mreq_n && main_addr[15: 9]==7'b1111_100;
     sound_cs       = !main_mreq_n && main_addr[15: 8]==8'hFA && !main_addr[7];
-    tres_cs        = !main_mreq_n && main_addr[15: 8]==8'hFA && main_addr[7] && !main_wr_n;
-    main2sub_nmi_n = !(!main_mreq_n && main_addr[15: 8]==8'hFB && main_addr[7:6]==2'b00);
+    tres_cs        = !main_mreq_n && main_addr[15: 8]==8'hFA && main_addr[7] && !main_wrn;
+    main2sub_nmi   = !main_mreq_n && main_addr[15: 8]==8'hFB && main_addr[7:6]==2'b00;
     misc_cs        = !main_mreq_n && main_addr[15: 8]==8'hFB && main_addr[7:6]==2'b01;
     main_mcu_cs    = !main_mreq_n && main_addr[15:10]==6'b1111_11;
 end
@@ -133,13 +143,13 @@ always @(posedge clk24 ) begin
     if( !main_rst_n ) begin
         bank      <= 3'd0;
         sub_rst_n <= 0;
-        mcu_rst_n <= 0;
+        mcu_rst   <= 1;
         black_n   <= 0;
         flip      <= 0;
     end else if(misc_cs) begin
         bank      <= cpu_dout[2:0];
         sub_rst_n <= cpu_dout[4];
-        mcu_rst_n <= cpu_dout[5];
+        mcu_rst   <= ~cpu_dout[5];
         black_n   <= cpu_dout[6];
         flip      <= cpu_dout[7];
     end
@@ -150,7 +160,7 @@ always @(posedge clk24 ) begin
     if( !main_rst_n ) begin
         snd_latch <= 8'd0;
     end else if(sound_cs) begin
-        if( !main_wr_n )
+        if( !main_wrn )
             snd_latch <= main_dout;
     end
 end
@@ -198,7 +208,7 @@ jtframe_z80 u_maincpu(
     .mreq_n   ( main_mreq_n    ),
     .iorq_n   ( main_iorq_n    ),
     .rd_n     ( main_rd_n      ),
-    .wr_n     ( main_wr_n      ),
+    .wr_n     ( main_wrn       ),
     .rfsh_n   ( main_rfsh_n    ),
     .halt_n   (                ),
     .busak_n  (                ),
@@ -227,13 +237,13 @@ jtframe_z80 u_subcpu(
     .cen      ( cen6           ),
     .wait_n   ( sub_wait_n     ),
     .int_n    ( sub_int_n      ),
-    .nmi_n    ( main2sub_nmi_n ),
+    .nmi_n    ( main2sub_nmi ),
     .busrq_n  ( 1'b1           ),
     .m1_n     (                ),
     .mreq_n   ( sub_mreq_n     ),
     .iorq_n   ( sub_iorq_n     ),
     .rd_n     ( sub_rd_n       ),
-    .wr_n     ( sub_wr_n       ),
+    .wr_n     ( sub_wrn        ),
     .rfsh_n   (                ),
     .halt_n   (                ),
     .busak_n  (                ),
@@ -282,6 +292,32 @@ jtframe_dual_ram #(.aw(11)) u_mcushared(
     .addr1  (                 ),
     .we1    (                 ),
     .q1     ( rammcu2mcu      )
+);
+
+jtframe_6801mcu u_mcu(
+    //.rst        ( mcu_rst       ),
+    .rst( rst ), // for quick sims
+    .clk        ( clk24         ),
+    .cen        ( cen6          ),  // this should be cen4, but let's start easy
+    .wrn        ( mcu_wrn       ),
+    .vma        ( mcu_vma       ),
+    .addr       ( mcu_addr      ),
+    .dout       ( mcu_dout      ), 
+    .halt       ( 1'b0          ),
+    .halted     (               ),
+    .irq        ( sub_int_n     ), // relies on sub CPU to clear it
+    .nmi        ( main2sub_nmi  ),
+    // Ports
+    .p1_in      ( p1_in         ),
+    .p1_out     ( p1_out        ),
+    // external RAM
+    .ext_cs     ( 1'b0          ),
+    .ext_dout   (               ),
+    // ROM interface
+    .rom_addr   ( mcu_rom_addr  ),
+    .rom_data   ( mcu_rom_data  ),
+    .rom_cs     ( mcu_rom_cs    ),
+    .rom_ok     ( mcu_rom_ok    )
 );
 
 endmodule
