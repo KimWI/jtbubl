@@ -46,10 +46,12 @@ reg  [15:0] col_in;
 wire        pal0_we = pal_cs & ~cpu_rnw & ~cpu_addr[0];
 wire        pal1_we = pal_cs & ~cpu_rnw &  cpu_addr[0];
 wire [ 7:0] cpu_a11 = cpu_addr[8:1];
+wire [ 7:0] pal_even, pal_odd;
 
-assign red  = col_out[7:4];
-assign green= col_out[3:0];
-assign blue = col_out[15:12];
+assign red      = col_out[7:4];
+assign green    = col_out[3:0];
+assign blue     = col_out[15:12];
+assign pal_dout = cpu_addr[0] ? pal_even : pal_odd;
 
 jtframe_dual_ram #(.aw(8),.simhexfile("pal_even.hex")) u_ram0(
     .clk0   ( clk24        ),
@@ -58,7 +60,7 @@ jtframe_dual_ram #(.aw(8),.simhexfile("pal_even.hex")) u_ram0(
     .data0  ( cpu_dout     ),
     .addr0  ( cpu_a11      ),
     .we0    ( pal0_we      ),
-    .q0     ( pal_dout     ),
+    .q0     ( pal_even     ),
     // Port 1
     .data1  (              ),
     .addr1  ( col_addr     ),
@@ -73,7 +75,7 @@ jtframe_dual_ram #(.aw(8),.simhexfile("pal_odd.hex")) u_ram1(
     .data0  ( cpu_dout     ),
     .addr0  ( cpu_a11      ),
     .we0    ( pal1_we      ),
-    .q0     ( pal_dout     ),
+    .q0     ( pal_odd      ),
     // Port 1
     .data1  (              ),
     .addr1  ( col_addr     ),

@@ -29,7 +29,9 @@ module mist_dump(
             `ifdef DEEPDUMP
                 $dumpvars(0,mist_test);
             `else
-                $dumpvars(0,mist_test.UUT.u_game.u_video);
+                $dumpvars(0,mist_test.UUT.u_game.u_main);
+                $dumpvars(0,mist_test.UUT.u_game.u_main.u_mcu);
+                //$dumpvars(0,mist_test.UUT.u_frame.u_board);
                 // $dumpvars(0,mist_test.UUT.u_game.u_sdram);
             `endif
             $dumpon;

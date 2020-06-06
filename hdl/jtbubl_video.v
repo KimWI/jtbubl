@@ -26,7 +26,7 @@ module jtbubl_video(
     output              LVBL,
     output              HS,
     output              VS,
-    output              flip,
+    input               flip,
     input               dip_pause,
     input               start_button,
     // PROMs

@@ -57,7 +57,7 @@ module jtbubl_main(
 
     // MCU ROM interface
     output     [11:0]   mcu_rom_addr,
-    output reg          mcu_rom_cs,
+    output              mcu_rom_cs,
     input               mcu_rom_ok,
     input      [ 7:0]   mcu_rom_data,
 
@@ -69,11 +69,15 @@ module jtbubl_main(
 
 reg  [ 7:0] main_din, sub_din;
 wire [ 7:0] ram2main, ram2sub, main_dout, sub_dout, mcu_dout,
-            rammcu2main, rammcu2mcu,
-            p1_in, p1_out;
+            rammcu2main, rammcu2mcu, rammcu_dout,
+            p1_in,  p2_in,          p4_in,
+            p1_out, p2_out, p3_out, p4_out;
+reg  [ 7:0] p3_in;
+wire [11:0] mcu_bus;
 wire [15:0] main_addr, sub_addr, mcu_addr;
 wire        main_mreq_n, main_iorq_n, main_rd_n, main_wrn, main_rfsh_n;
 wire        sub_mreq_n,  sub_iorq_n,  sub_rd_n,  sub_wrn, mcu_wrn;
+wire        rammcu_we, rammcu_cs;
 reg         main_sub_cs, main_mcu_cs, // shared memories
             tres_cs,  // watchdog reset
             main2sub_nmi,
@@ -96,9 +100,12 @@ assign      sub_we       = sub_main_cs && !sub_wrn;
 assign      cpu_addr     = main_addr[12:0];
 assign      cpu_dout     = main_dout;
 assign      cpu_rnw      = main_wrn;
-assign      mcu2main_int_n = 1;
+assign      p1_in[7:4]   = 4'hf;
 assign      p1_in[3:2]   = coin_input;
 assign      p1_in[1:0]   = 2'b11;
+assign      mcu_bus      = { p2_out[3:0], p4_out };
+assign      rammcu_cs    = mcu_bus[11:10]==2'b11;
+assign      rammcu_we    = !p1_out[7] && rammcu_cs;
 
 // Watchdog and main CPU reset
 always @(posedge clk24, posedge rst) begin
@@ -278,23 +285,48 @@ jtframe_ff u_subint(
 /////////////////////////////////////////
 // MCU
 
-// Time shared
-jtframe_dual_ram #(.aw(11)) u_mcushared(
-    .clk0   ( clk24           ),
-    .clk1   ( clk24           ),
-    // Port 0
-    .data0  ( main_dout       ),
-    .addr0  ( main_addr[10:0] ),
-    .we0    ( mainmcu_we      ),
-    .q0     ( rammcu2main     ),
-    // Port 1
-    .data1  (                 ),
-    .addr1  (                 ),
-    .we1    (                 ),
-    .q1     ( rammcu2mcu      )
+jtframe_ff u_mcu2main (
+    .clk    ( clk24          ),
+    .rst    ( rst            ),
+    .cen    ( 1'b1           ),
+    .din    ( 1'b1           ),
+    .q      (                ),
+    .qn     ( mcu2main_int_n ),
+    .set    ( 1'b1           ),
+    .clr    ( main_iorq_n    ),
+    .sigedge( p1_out[6]      )
 );
 
-jtframe_6801mcu u_mcu(
+// Time shared
+jtframe_dual_ram #(.aw(11)) u_mcushared(
+    .clk0   ( clk24                ),
+    .clk1   ( clk24                ),
+    // Port 0: Main CPU access
+    .data0  ( main_dout            ),
+    .addr0  ( main_addr[10:0]      ),
+    .we0    ( mainmcu_we           ),
+    .q0     ( rammcu2main          ),
+    // Port 1: MCU access
+    .data1  ( rammcu_dout          ),
+    .addr1  ( {1'b0, mcu_bus[9:0]} ),
+    .we1    ( rammcu_we            ),
+    .q1     ( rammcu2mcu           )
+);
+
+always @(*) begin
+    if( rammcu_cs )
+        p3_in = rammcu2mcu;
+    else begin
+        case( mcu_bus[1:0] )
+            2'd0: p3_in = dipsw_a;
+            2'd1: p3_in = dipsw_b;
+            2'd2: p3_in = {1'b1, start_button[0], joystick1 };
+            2'd3: p3_in = {1'b1, start_button[1], joystick2 };
+        endcase // mcu_bus[1:0]
+    end
+end
+
+jtframe_6801mcu #(.MAXPORT(7)) u_mcu (
     //.rst        ( mcu_rst       ),
     .rst( rst ), // for quick sims
     .clk        ( clk24         ),
@@ -306,10 +338,18 @@ jtframe_6801mcu u_mcu(
     .halt       ( 1'b0          ),
     .halted     (               ),
     .irq        ( sub_int_n     ), // relies on sub CPU to clear it
-    .nmi        ( main2sub_nmi  ),
+    //.nmi        ( main2sub_nmi  ),
+    //.irq( 0 ),
+    .nmi        ( 0             ),
     // Ports
     .p1_in      ( p1_in         ),
     .p1_out     ( p1_out        ),
+    .p2_in      ( p2_in         ),
+    .p2_out     ( p2_out        ),
+    .p3_in      ( p3_in         ),
+    .p3_out     ( p3_out        ),
+    .p4_in      ( p4_in         ),
+    .p4_out     ( p4_out        ),
     // external RAM
     .ext_cs     ( 1'b0          ),
     .ext_dout   (               ),
