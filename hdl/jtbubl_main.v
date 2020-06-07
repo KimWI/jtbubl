@@ -87,7 +87,7 @@ wire        sub_we, main_we, mainmcu_we, sub_int_n, mcu2main_int_n,
             mcu_vma;
 reg  [ 2:0] bank;
 reg         main_rst_n, sub_rst_n, mcu_rst;
-reg  [ 7:0] wdog_cnt;
+reg  [ 7:0] wdog_cnt, int_vector;
 reg         last_LVBL;
 
 assign      main_rom_addr = main_addr[15] ?
@@ -140,8 +140,9 @@ always @(*) begin
         vram_cs     ? vram_dout     : (
         pal_cs      ? pal_dout      : (
         main_sub_cs ? ram2main      : (
-        main_mcu_cs ? rammcu2main   : 8'hff
-        ))));
+        main_mcu_cs ? rammcu2main   : (
+        !main_iorq_n? int_vector    : 8'hff
+        )))));
 end
 
 // Main CPU miscellaneous control bits
@@ -293,12 +294,12 @@ jtframe_ff u_mcu2main (
     .din    ( 1'b1           ),
     .q      (                ),
     .qn     ( mcu2main_int_n ),
-    .set    ( 1'b1           ),
+    .set    ( 1'b0           ),
     .clr    ( ~main_iorq_n   ),
     // This is a jumper on the schematics
     // it can come from P1[6] or from VBL
-    //.sigedge( p1_out[6]      )
-    .sigedge( ~LVBL          )
+    .sigedge( p1_out[6]      )
+    //.sigedge( ~LVBL          )
 );
 
 // Time shared
@@ -363,6 +364,7 @@ always @(posedge clk24, posedge rst) begin
         rammcu_we       <= 0;
         last_rammcu_clk <= 1;
         rammcu_din      <= 8'd0;
+        int_vector      <= 8'h2e;
     end else if(cen_mcu) begin
         last_rammcu_clk <= rammcu_clk;
         if( rammcu_clk && !last_rammcu_clk ) begin
@@ -370,6 +372,7 @@ always @(posedge clk24, posedge rst) begin
                 rammcu_cs <= 1;
                 rammcu_we <= !p1_out[7];
                 rammcu_din <= p3_out;
+                if( mcu_bus[9:0]==10'd0 ) int_vector <= p3_out;
             end else begin
                 rammcu_cs <= 0;
                 rammcu_we <= 0;
@@ -397,11 +400,11 @@ jtframe_6801mcu #(.MAXPORT(7)) u_mcu (
     // Ports
     .p1_in      ( p1_in         ),
     .p1_out     ( p1_out        ),
-    .p2_in      ( p2_out        ), // feed back p2_out for sims
+    .p2_in      ( 8'hff         ), // feed back p2_out for sims
     .p2_out     ( p2_out        ),
     .p3_in      ( p3_in         ),
     .p3_out     ( p3_out        ),
-    .p4_in      ( p4_out        ), // feed back p4_out for sims
+    .p4_in      ( 8'hff         ), // feed back p4_out for sims
     .p4_out     ( p4_out        ),
     // external RAM
     .ext_cs     ( 1'b0          ),
