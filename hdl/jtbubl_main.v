@@ -101,7 +101,7 @@ assign      cpu_addr     = main_addr[12:0];
 assign      cpu_dout     = main_dout;
 assign      cpu_rnw      = main_wrn;
 assign      p1_in[7:4]   = 4'hf;
-assign      p1_in[3:2]   = coin_input;
+assign      p1_in[3:2]   = ~coin_input;
 assign      p1_in[1:0]   = 2'b11;
 assign      mcu_bus      = { p2_out[3:0], p4_out };
 
@@ -354,7 +354,8 @@ always @(posedge clk24, posedge rst) begin
 end
 
 wire rammcu_clk = p2_out[4];
-reg last_rammcu_clk;
+reg  last_rammcu_clk;
+wire mcu_posedge = !last_rammcu_clk && rammcu_clk;
 
 always @(posedge clk24, posedge rst) begin
     if( rst ) begin
