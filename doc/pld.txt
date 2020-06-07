@@ -1,0 +1,70 @@
+IC 12
+=====
+Schematic 4-2 (MS CPU PC BOARD)
+Purpose: MCU memory driver
+
+Inputs:
+
+2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 15, 16, 17, 18, 19
+
+i1 = clk
+i2 = /MCRAM, RAM select signal coming from main CPU addr decoder
+i3 = port P2.4 of MCU
+i4 = port P1.7 of MCU (data direction)
+i5 = /LWR main CPU WRn
+i6 = /LRD main CPU RDn
+i7 = /VECT = main CPU /IORQ
+i8 = i1 = clk
+
+Outputs:
+
+12 (Combinatorial, Output feedback output, Active low)
+13 (Combinatorial, Output feedback output, Active low)
+14 (Registered, Output feedback registered, Active low)
+15 (Registered, Output feedback registered, Active low)
+16 (Registered, Output feedback registered, Active low)
+17 (Registered, Output feedback registered, Active high)
+18 (Combinatorial, Output feedback output, Active low)
+19 (Combinatorial, Output feedback output, Active low)
+
+
+// combinational outputs
+/o12 = SCI input of MCU
+/o13 = low if MCU drives the memory
+/o18 = mux select. if low main CPU drives the memory
+                  if high MCU drives the memory
+/o19 = unused
+
+Equations:
+
+/o12 = i4 & /rf14 +
+       i4 & /i8 & /o13 & /rf15 & /rf16 & o18
+o12.oe = vcc
+
+/o13 = i4 & rf14 & /rf15 & /rf16 & o18 +
+       i2 & rf14 & /rf15 & /rf16 & o18
+o13.oe = vcc
+
+/rf14 := /rf15 +
+         /i2 & /i3 & /rf14 +
+         /i3 & /i7 & /rf14
+rf14.oe = OE
+
+/rf15 := i2 & i7 & /rf16
+rf15.oe = OE
+
+/rf16 := i2 & /i3 & i7
+rf16.oe = OE
+
+rf17 := i2 & i7 +
+        i5 & i6 & i7
+rf17.oe = OE
+
+/o18 = /i7 & o13 +
+       /i2 & /i5 & i6 & o13 +
+       /i2 & /i6 & o13 & /rf17
+o18.oe = vcc
+
+/o19 = /i4 & rf14 & /rf15 & /rf16 & rf17 +
+       /i2 & /i5 & rf17
+o19.oe = vcc
