@@ -126,9 +126,9 @@ always @(*) begin
     main_sub_cs    = !main_mreq_n && main_addr[15:13]==3'b111 && main_addr[12:11]!=2'b11;
     pal_cs         = !main_mreq_n && main_addr[15: 9]==7'b1111_100;
     sound_cs       = !main_mreq_n && main_addr[15: 8]==8'hFA && !main_addr[7];
-    tres_cs        = !main_mreq_n && main_addr[15: 8]==8'hFA && main_addr[7] && !main_wrn;
-    main2sub_nmi   = !main_mreq_n && main_addr[15: 8]==8'hFB && main_addr[7:6]==2'b00;
-    misc_cs        = !main_mreq_n && main_addr[15: 8]==8'hFB && main_addr[7:6]==2'b01;
+    tres_cs        = !main_mreq_n && main_addr[15: 8]==8'hFA && main_addr[7];
+    main2sub_nmi   = !main_mreq_n && main_addr[15: 8]==8'hFB && main_addr[7:6]==2'b00 && !main_wrn;
+    misc_cs        = !main_mreq_n && main_addr[15: 8]==8'hFB && main_addr[7:6]==2'b01 && !main_wrn;
     main_mcu_cs    = !main_mreq_n && main_addr[15:10]==6'b1111_11;
 end
 
