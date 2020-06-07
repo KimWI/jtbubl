@@ -242,7 +242,7 @@ jtframe_z80 u_subcpu(
     .cen      ( cen6           ),
     .wait_n   ( sub_wait_n     ),
     .int_n    ( sub_int_n      ),
-    .nmi_n    ( main2sub_nmi ),
+    .nmi_n    ( ~main2sub_nmi  ),
     .busrq_n  ( 1'b1           ),
     .m1_n     (                ),
     .mreq_n   ( sub_mreq_n     ),
@@ -383,8 +383,6 @@ jtframe_6801mcu #(.MAXPORT(7)) u_mcu (
     .halt       ( 1'b0          ),
     .halted     (               ),
     .irq        ( mcuirq        ), // relies on sub CPU to clear it
-    //.nmi        ( main2sub_nmi  ),
-    //.irq( 0 ),
     .nmi        ( 1'b0          ),
     // Ports
     .p1_in      ( p1_in         ),
