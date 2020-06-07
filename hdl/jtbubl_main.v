@@ -115,7 +115,8 @@ always @(posedge clk24, posedge rst) begin
         if( tres_cs )
             wdog_cnt <= 8'd0;
         else if( LVBL && !last_LVBL ) wdog_cnt <= wdog_cnt + 8'd1;
-        main_rst_n <= ~wdog_cnt[7];
+        //main_rst_n <= ~wdog_cnt[7];
+        main_rst_n <= 1;
     end
 end
 
@@ -201,6 +202,8 @@ jtframe_dual_ram #(.aw(13)) u_subshared(
 /////////////////////////////////////////
 // Main CPU
 
+wire main_halt_n;
+
 jtframe_z80 u_maincpu(
     .rst_n    ( main_rst_n     ),
     .clk      ( clk24          ),
@@ -215,7 +218,7 @@ jtframe_z80 u_maincpu(
     .rd_n     ( main_rd_n      ),
     .wr_n     ( main_wrn       ),
     .rfsh_n   ( main_rfsh_n    ),
-    .halt_n   (                ),
+    .halt_n   ( main_halt_n    ),
     .busak_n  (                ),
     .A        ( main_addr      ),
     .din      ( main_din       ),
@@ -291,24 +294,27 @@ jtframe_ff u_mcu2main (
     .q      (                ),
     .qn     ( mcu2main_int_n ),
     .set    ( 1'b1           ),
-    .clr    ( main_iorq_n    ),
-    .sigedge( p1_out[6]      )
+    .clr    ( ~main_iorq_n   ),
+    // This is a jumper on the schematics
+    // it can come from P1[6] or from VBL
+    //.sigedge( p1_out[6]      )
+    .sigedge( ~LVBL          )
 );
 
 // Time shared
-jtframe_dual_ram #(.aw(11)) u_mcushared(
-    .clk0   ( clk24                ),
-    .clk1   ( clk24                ),
+jtframe_dual_ram #(.aw(10)) u_mcushared(
+    .clk0   ( clk24            ),
+    .clk1   ( clk24            ),
     // Port 0: Main CPU access
-    .data0  ( main_dout            ),
-    .addr0  ( main_addr[10:0]      ),
-    .we0    ( mainmcu_we           ),
-    .q0     ( rammcu2main          ),
+    .data0  ( main_dout        ),
+    .addr0  ( main_addr[9:0]   ),
+    .we0    ( mainmcu_we       ),
+    .q0     ( rammcu2main      ),
     // Port 1: MCU access
-    .data1  ( rammcu_din          ),
-    .addr1  ( {1'b0, mcu_bus[9:0]} ),
-    .we1    ( rammcu_we            ),
-    .q1     ( rammcu2mcu           )
+    .data1  ( rammcu_din       ),
+    .addr1  ( mcu_bus[9:0]     ),
+    .we1    ( rammcu_we        ),
+    .q1     ( rammcu2mcu       )
 );
 
 always @(*) begin
@@ -366,8 +372,11 @@ always @(posedge clk24, posedge rst) begin
             end else begin
                 rammcu_cs <= 0;
                 rammcu_we <= 0;
-            end            
-        end
+            end   
+        end else begin
+            rammcu_cs <= 0;
+            rammcu_we <= 0;
+        end            
     end
 end
 
