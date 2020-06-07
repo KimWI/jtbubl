@@ -69,15 +69,15 @@ module jtbubl_main(
 
 reg  [ 7:0] main_din, sub_din;
 wire [ 7:0] ram2main, ram2sub, main_dout, sub_dout, mcu_dout,
-            rammcu2main, rammcu2mcu, rammcu_dout,
-            p1_in,  p2_in,          p4_in,
+            rammcu2main, rammcu2mcu,
+            p1_in,
             p1_out, p2_out, p3_out, p4_out;
-reg  [ 7:0] p3_in;
+reg  [ 7:0] p3_in, rammcu_din;
 wire [11:0] mcu_bus;
 wire [15:0] main_addr, sub_addr, mcu_addr;
 wire        main_mreq_n, main_iorq_n, main_rd_n, main_wrn, main_rfsh_n;
 wire        sub_mreq_n,  sub_iorq_n,  sub_rd_n,  sub_wrn, mcu_wrn;
-wire        rammcu_we, rammcu_cs;
+reg         rammcu_we, rammcu_cs;
 reg         main_sub_cs, main_mcu_cs, // shared memories
             tres_cs,  // watchdog reset
             main2sub_nmi,
@@ -104,8 +104,6 @@ assign      p1_in[7:4]   = 4'hf;
 assign      p1_in[3:2]   = coin_input;
 assign      p1_in[1:0]   = 2'b11;
 assign      mcu_bus      = { p2_out[3:0], p4_out };
-assign      rammcu_cs    = mcu_bus[11:10]==2'b11;
-assign      rammcu_we    = !p1_out[7] && rammcu_cs;
 
 // Watchdog and main CPU reset
 always @(posedge clk24, posedge rst) begin
@@ -307,7 +305,7 @@ jtframe_dual_ram #(.aw(11)) u_mcushared(
     .we0    ( mainmcu_we           ),
     .q0     ( rammcu2main          ),
     // Port 1: MCU access
-    .data1  ( rammcu_dout          ),
+    .data1  ( rammcu_din          ),
     .addr1  ( {1'b0, mcu_bus[9:0]} ),
     .we1    ( rammcu_we            ),
     .q1     ( rammcu2mcu           )
@@ -326,29 +324,76 @@ always @(*) begin
     end
 end
 
+reg [3:0] clrcnt;
+reg       last_sub_int_n;
+reg       mcuirq;
+
+wire      cen_mcu = cen6;
+
+always @(posedge clk24, posedge rst) begin
+    if( rst ) begin
+        clrcnt <= 4'd0;
+        last_sub_int_n <= 1;
+        mcuirq <= 0;
+    end else if(cen_mcu) begin
+        last_sub_int_n <= sub_int_n;
+        if( last_sub_int_n && !sub_int_n ) begin
+            clrcnt <= 4'd0;
+            mcuirq <= 1;
+        end else if(mcuirq) begin
+            clrcnt<=clrcnt+4'd1;
+            if(&clrcnt) mcuirq<=0;
+        end
+    end
+end
+
+wire rammcu_clk = p2_out[4];
+reg last_rammcu_clk;
+
+always @(posedge clk24, posedge rst) begin
+    if( rst ) begin
+        rammcu_cs       <= 0;
+        rammcu_we       <= 0;
+        last_rammcu_clk <= 1;
+        rammcu_din      <= 8'd0;
+    end else if(cen_mcu) begin
+        last_rammcu_clk <= rammcu_clk;
+        if( rammcu_clk && !last_rammcu_clk ) begin
+            if( mcu_bus[11:10]==2'b11 ) begin
+                rammcu_cs <= 1;
+                rammcu_we <= !p1_out[7];
+                rammcu_din <= p3_out;
+            end else begin
+                rammcu_cs <= 0;
+                rammcu_we <= 0;
+            end            
+        end
+    end
+end
+
 jtframe_6801mcu #(.MAXPORT(7)) u_mcu (
-    //.rst        ( mcu_rst       ),
-    .rst( rst ), // for quick sims
+    .rst        ( mcu_rst       ),
+    //.rst( rst ), // for quick sims
     .clk        ( clk24         ),
-    .cen        ( cen6          ),  // this should be cen4, but let's start easy
+    .cen        ( cen_mcu       ),  // this should be cen4, but let's start easy
     .wrn        ( mcu_wrn       ),
     .vma        ( mcu_vma       ),
     .addr       ( mcu_addr      ),
     .dout       ( mcu_dout      ), 
     .halt       ( 1'b0          ),
     .halted     (               ),
-    .irq        ( sub_int_n     ), // relies on sub CPU to clear it
+    .irq        ( mcuirq        ), // relies on sub CPU to clear it
     //.nmi        ( main2sub_nmi  ),
     //.irq( 0 ),
-    .nmi        ( 0             ),
+    .nmi        ( 1'b0          ),
     // Ports
     .p1_in      ( p1_in         ),
     .p1_out     ( p1_out        ),
-    .p2_in      ( p2_in         ),
+    .p2_in      ( p2_out        ), // feed back p2_out for sims
     .p2_out     ( p2_out        ),
     .p3_in      ( p3_in         ),
     .p3_out     ( p3_out        ),
-    .p4_in      ( p4_in         ),
+    .p4_in      ( p4_out        ), // feed back p4_out for sims
     .p4_out     ( p4_out        ),
     // external RAM
     .ext_cs     ( 1'b0          ),
