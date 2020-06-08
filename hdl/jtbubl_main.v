@@ -209,7 +209,7 @@ jtframe_dual_ram #(.aw(13)) u_subshared(
 /////////////////////////////////////////
 // Main CPU
 
-wire main_halt_n;
+wire main_halt_n, main_wait_n, sub_wait_n;
 
 jtframe_z80 u_maincpu(
     .rst_n    ( main_rst_n     ),
@@ -373,7 +373,7 @@ always @(posedge clk24, posedge rst) begin
         int_vector      <= 8'h2e;
     end else if(cen_mcu) begin
         last_rammcu_clk <= rammcu_clk;
-        if( rammcu_clk && !last_rammcu_clk ) begin
+        if( mcu_posedge ) begin
             if( mcu_bus[11:10]==2'b11 ) begin
                 rammcu_cs <= 1;
                 rammcu_we <= !p1_out[7];

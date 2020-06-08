@@ -90,7 +90,7 @@ reg         ch;
 reg  [ 1:0] hflip, vflip;
 reg         hf_mux, vf_mux;
 reg  [ 1:0] waitok;
-reg         last_LHBL;
+//reg         last_LHBL;
 reg         busy, idle; // extra cycle to wait for memories
 wire [15:0] vrmux;
 wire        lden_b, next;
@@ -105,7 +105,7 @@ assign vrmux     = sa[11] ? {scan3_data, scan2_data} : {scan1_data, scan0_data};
 assign lden_b    = dec_dout[2];
 assign next      = dec_dout[3];
 
-always @(posedge clk) last_LHBL <= LHBL;
+//always @(posedge clk) last_LHBL <= LHBL;
 
 `ifdef SIMULATION
 wire [1:0] phase = { ch, oa[0] };
@@ -114,7 +114,7 @@ wire [1:0] phase = { ch, oa[0] };
 // Collection of tile information
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
-        oa      <= 10'd0;
+        oa      <= 9'd0;
         ch      <= 0;
         idle    <= 0;
         code0   <= 10'd0;
