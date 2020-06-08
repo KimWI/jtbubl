@@ -77,10 +77,11 @@
         <!-- Total 0xC0100 bytes - 768 kBytes -->
     </rom>
     <rom index="1">00</rom>
-    <switches default="FF,FF" base="16">
+    <switches default="FF,FE" base="16">
         <!-- DSW0 -->
+        <dip name="Mode" bits="0" ids="English,Japanese"/>
         <dip name="Flip Screen" bits="1" ids="On,Off"/>
-        <dip name="Mode" bits="0" ids="Test /Pause,Test,Game, English,Game, Japanese"/>
+        <dip name="Test" bits="2" ids="On,Off"/>
         <dip name="Demo Sounds" bits="3" ids="Off,On"/>
         <dip name="Coin A" bits="4,5" ids="2/3,2/1,1/2,1/1"/>
         <dip name="Coin B" bits="6,7" ids="2/3,2/1,1/2,1/1"/>
