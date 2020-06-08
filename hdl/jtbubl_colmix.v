@@ -51,7 +51,7 @@ wire [ 7:0] pal_even, pal_odd;
 assign red      = col_out[7:4];
 assign green    = col_out[3:0];
 assign blue     = col_out[15:12];
-assign pal_dout = cpu_addr[0] ? pal_even : pal_odd;
+assign pal_dout = !cpu_addr[0] ? pal_even : pal_odd;
 
 jtframe_dual_ram #(.aw(8),.simhexfile("pal_even.hex")) u_ram0(
     .clk0   ( clk24        ),

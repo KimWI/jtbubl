@@ -71,7 +71,7 @@ module jtbubl_game(
 
 wire        main_cs, sub_cs, mcu_cs, snd_cs, gfx_cs;
 wire        main_ok, sub_ok, mcu_ok, snd_ok, gfx_ok;
-wire        snd_irq, black_n, flip;
+wire        snd_rst, black_n, flip;
 wire [31:0] gfx_data;
 wire [17:0] gfx_addr;
 
@@ -138,9 +138,6 @@ jtbubl_main u_main(
     .clk24          ( clk24         ),        // 24 MHz
     .cen6           ( cen6          ),
     //.cpu_cen        ( cpu_cen       ),
-    // communication with main CPU
-    // .snd_irq        ( snd_irq       ),
-    // .snd_latch      ( snd_latch     ),
     // Main CPU ROM
     .main_rom_addr  ( main_addr     ),
     .main_rom_cs    ( main_cs       ),
@@ -159,6 +156,7 @@ jtbubl_main u_main(
 
     // Sound
     .snd_latch      ( snd_latch     ),
+    .snd_rst        ( snd_rst       ),
     // cabinet I/O
     .start_button   ( start_button  ),
     .coin_input     ( coin_input    ),
@@ -208,7 +206,6 @@ jtbubl_video u_video(
     .prog_addr      ( prog_addr[7:0]),
     .prog_data      ( prog_data[3:0]),    
     // GFX - CPU interface
-    //.cpu_irqn       ( cpu_irqn      ),
     .vram_cs        ( vram_cs       ),
     .pal_cs         ( pal_cs        ),
     .cpu_rnw        ( cpu_rnw       ),
@@ -234,10 +231,9 @@ jtbubl_video u_video(
 `ifndef NOSOUND
 jtbubl_sound u_sound(
     .clk        ( clk24         ), // 24 MHz
-    .rst        ( rst           ),
+    .rst        ( snd_rst       ),
     .cen12      ( cen12         ),
     // communication with main CPU
-    .snd_irq    ( snd_irq       ),
     .snd_latch  ( snd_latch     ),
     // ROM
     .rom_addr   ( snd_addr      ),

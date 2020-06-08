@@ -48,7 +48,7 @@ module jtbubl_gfx(
 
 wire [ 7:0] scan0_data, scan1_data, scan2_data, scan3_data;
 wire [ 7:0] vram0_dout, vram1_dout, vram2_dout, vram3_dout;
-wire [10:0] vram_addr = cpu_addr[12:2];
+wire [10:0] vram_addr = cpu_addr[11:1];
 reg  [ 3:0] vram_we, cpu_cc;
 reg  [ 7:0] line_din;
 reg  [ 8:0] line_addr;
@@ -64,7 +64,7 @@ always @(*) begin
 end
 
 
-always @(posedge clk) begin
+always @(posedge clk24) begin
     case( cpu_cc )
         4'b0001: vram_dout <= vram0_dout;
         4'b0010: vram_dout <= vram1_dout;
