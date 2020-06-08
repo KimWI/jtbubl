@@ -46,5 +46,5 @@ echo "Game ROM length: " $GAME_ROM_LEN
 $JTFRAME/bin/sim.sh $MIST -d GAME_ROM_LEN=$GAME_ROM_LEN \
     -sysname bubl -d SCANDOUBLER_DISABLE=1 \
     -def ../../hdl/jtbubl.def \
-    -d FAST_LOAD \
+    -d FAST_LOAD -d VIDEO_START=1 \
     $*

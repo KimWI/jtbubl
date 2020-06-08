@@ -64,13 +64,13 @@ always @(*) begin
 end
 
 
-always @(posedge clk24) begin
+always @(*) begin
     case( cpu_cc )
-        4'b0001: vram_dout <= vram0_dout;
-        4'b0010: vram_dout <= vram1_dout;
-        4'b0100: vram_dout <= vram2_dout;
-        4'b1000: vram_dout <= vram3_dout;
-        default: vram_dout <= 8'hff;
+        4'b0001: vram_dout = vram0_dout;
+        4'b0010: vram_dout = vram1_dout;
+        4'b0100: vram_dout = vram2_dout;
+        4'b1000: vram_dout = vram3_dout;
+        default: vram_dout = 8'hff;
     endcase
 end
 

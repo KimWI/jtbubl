@@ -156,7 +156,7 @@ always @(posedge clk24 ) begin
         black_n   <= 0;
         flip      <= 0;
     end else if(misc_cs) begin
-        bank      <= cpu_dout[2:0];
+        bank      <= cpu_dout[2:0]^3'b100;
         sub_rst_n <= cpu_dout[4];
         mcu_rst   <= ~cpu_dout[5];
         black_n   <= cpu_dout[6];

@@ -43,9 +43,9 @@ module jtbubl_colmix(
 wire [15:0] col_out;
 wire [15:0] co_bus;
 reg  [15:0] col_in;
-wire        pal0_we = pal_cs & ~cpu_rnw & ~cpu_addr[0];
-wire        pal1_we = pal_cs & ~cpu_rnw &  cpu_addr[0];
-wire [ 7:0] cpu_a11 = cpu_addr[8:1];
+wire        pal0_we  = pal_cs & ~cpu_rnw & ~cpu_addr[0];
+wire        pal1_we  = pal_cs & ~cpu_rnw &  cpu_addr[0];
+wire [ 7:0] pal_addr = cpu_addr[8:1];
 wire [ 7:0] pal_even, pal_odd;
 
 assign red      = col_out[7:4];
@@ -58,7 +58,7 @@ jtframe_dual_ram #(.aw(8),.simhexfile("pal_even.hex")) u_ram0(
     .clk1   ( clk          ),
     // Port 0
     .data0  ( cpu_dout     ),
-    .addr0  ( cpu_a11      ),
+    .addr0  ( pal_addr     ),
     .we0    ( pal0_we      ),
     .q0     ( pal_even     ),
     // Port 1
@@ -73,7 +73,7 @@ jtframe_dual_ram #(.aw(8),.simhexfile("pal_odd.hex")) u_ram1(
     .clk1   ( clk          ),
     // Port 0
     .data0  ( cpu_dout     ),
-    .addr0  ( cpu_a11      ),
+    .addr0  ( pal_addr     ),
     .we0    ( pal1_we      ),
     .q0     ( pal_odd      ),
     // Port 1
@@ -84,9 +84,10 @@ jtframe_dual_ram #(.aw(8),.simhexfile("pal_odd.hex")) u_ram1(
 );
 
 `ifdef GRAY
-always @(posedge clk) if(pxl_cen) col_in <= {4{col_addr[3:0]}};
+always @(*) //if(pxl_cen) 
+    col_in = {4{col_addr[3:0]}};
 `else
-always @(posedge clk) if(pxl_cen) 
+always @(*) //if(pxl_cen) 
     col_in = co_bus & {16{black_n}};
 `endif
 
@@ -98,7 +99,7 @@ jtframe_blank #(.DLY(1),.DW(16)) u_blank(
     .LHBL_dly   ( LHBL_dly  ),
     .LVBL_dly   ( LVBL_dly  ),
     .preLBL     (           ),
-    .rgb_in     ( co_bus    ),
+    .rgb_in     ( col_in    ),
     .rgb_out    ( col_out   )
 );
 
