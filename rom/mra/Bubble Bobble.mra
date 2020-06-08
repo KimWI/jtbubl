@@ -21,7 +21,7 @@
 
 <misterromdescription>
     <about author="jotego" webpage="https://patreon.com/topapate" source="https://github.com/jotego/jtbubl" twitter="@topapate"/>
-    <name>bublbobl</name>
+    <name>Bubble Bobble</name>
     <setname>bublbobl</setname>
     <rbf>jtbubl</rbf>
     <rom index="0" zip="bublbobl.zip" type="merged" md5="None">
@@ -86,11 +86,13 @@
         <dip name="Coin A" bits="4,5" ids="2/3,2/1,1/2,1/1"/>
         <dip name="Coin B" bits="6,7" ids="2/3,2/1,1/2,1/1"/>
         <!-- DSW1 -->
-        <dip name="Difficulty" bits="8,9" ids="Very Hard,Hard,Easy,Normal"/>
+        <dip name="Level" bits="8,9" ids="Hardest,Hard,Easy,Normal"/>
         <dip name="Bonus Life" bits="10,11" ids="50K 250K 500K,40K 200K 500K,20K 80K 300K,30K 100K 400K"/>
         <dip name="Lives" bits="12,13" ids="2,1,5,3"/>
         <dip name="Unknown" bits="14" ids="On,Off"/>
-        <dip name="ROM Type" bits="15" ids="IC52=256kb, IC53=256kb,IC52=512kb, IC53=none"/>
+        <!--
+        <dip name="ROM Type" bits="15" ids="IC52=256kb-IC53=256kb,IC52=512kb-IC53=none"/>
+        -->
     </switches>
     <buttons names="Fire,Jump,Start,Coin,Pause" default="A,B,R,L,Start"/>
 </misterromdescription>

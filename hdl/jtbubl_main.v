@@ -95,8 +95,8 @@ assign      main_rom_addr = main_addr[15] ?
                         { { {1'b0, bank}+4'b10} , main_addr[13:0] } : // banked
                         { 3'd0, main_addr[14:0] }; // not banked
 assign      sub_rom_addr = sub_addr[14:0];
-assign      main_we      = main_sub_cs && !main_wrn;
-assign      mainmcu_we   = main_mcu_cs && !main_wrn;
+assign      main_we      = main_sub_cs && !main_wrn && cen6;
+assign      mainmcu_we   = main_mcu_cs && !main_wrn && cen6;
 assign      sub_we       = sub_main_cs && !sub_wrn && sub_rst_n;
 assign      cpu_addr     = main_addr[12:0];
 assign      cpu_dout     = main_dout;
