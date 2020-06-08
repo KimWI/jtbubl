@@ -97,7 +97,7 @@ assign      main_rom_addr = main_addr[15] ?
 assign      sub_rom_addr = sub_addr[14:0];
 assign      main_we      = main_sub_cs && !main_wrn;
 assign      mainmcu_we   = main_mcu_cs && !main_wrn;
-assign      sub_we       = sub_main_cs && !sub_wrn;
+assign      sub_we       = sub_main_cs && !sub_wrn && sub_rst_n;
 assign      cpu_addr     = main_addr[12:0];
 assign      cpu_dout     = main_dout;
 assign      cpu_rnw      = main_wrn;
@@ -116,8 +116,8 @@ always @(posedge clk24, posedge rst) begin
         if( tres_cs )
             wdog_cnt <= 8'd0;
         else if( LVBL && !last_LVBL ) wdog_cnt <= wdog_cnt + 8'd1;
-        //main_rst_n <= ~wdog_cnt[7];
-        main_rst_n <= 1;
+        main_rst_n <= ~wdog_cnt[7];
+        //main_rst_n <= 1;
     end
 end
 
@@ -279,7 +279,7 @@ jtframe_rom_wait u_subwait(
 );
 
 jtframe_ff u_subint(
-    .rst    ( rst           ),
+    .rst    ( ~sub_rst_n    ),
     .clk    ( clk24         ),
     .cen    ( 1'b1          ),
     .din    ( 1'b1          ),
@@ -295,7 +295,7 @@ jtframe_ff u_subint(
 
 jtframe_ff u_mcu2main (
     .clk    ( clk24          ),
-    .rst    ( rst            ),
+    .rst    ( mcu_rst        ),
     .cen    ( 1'b1           ),
     .din    ( 1'b1           ),
     .q      (                ),
@@ -343,8 +343,8 @@ reg       mcuirq;
 
 wire      cen_mcu = cen6;
 
-always @(posedge clk24, posedge rst) begin
-    if( rst ) begin
+always @(posedge clk24) begin
+    if( mcu_rst ) begin
         clrcnt <= 4'd0;
         last_sub_int_n <= 1;
         mcuirq <= 0;
@@ -364,8 +364,8 @@ wire rammcu_clk = p2_out[4];
 reg  last_rammcu_clk;
 wire mcu_posedge = !last_rammcu_clk && rammcu_clk;
 
-always @(posedge clk24, posedge rst) begin
-    if( rst ) begin
+always @(posedge clk24) begin
+    if( mcu_rst ) begin
         rammcu_cs       <= 0;
         rammcu_we       <= 0;
         last_rammcu_clk <= 1;
