@@ -378,7 +378,7 @@ always @(posedge clk24, posedge rst) begin
                 rammcu_we <= 0;
             end   
         end else begin
-            rammcu_cs <= 0;
+            //rammcu_cs <= 0;
             rammcu_we <= 0;
         end            
     end
