@@ -79,7 +79,7 @@ wire [ 7:0] main_data, sub_data, mcu_data, snd_data, snd_latch;
 wire [14:0] snd_addr, sub_addr;
 wire [11:0] mcu_addr;
 wire [17:0] main_addr;
-wire        cen12, cen6, prom_we;
+wire        cen12, cen6, cen4, prom_we;
 
 wire [ 7:0] dipsw_a, dipsw_b;
 wire        LHBL, LVBL;
@@ -105,7 +105,7 @@ jtframe_cen24 u_cen(
     .clk        ( clk24         ),    // 24 MHz
     .cen12      ( cen12         ),
     .cen6       ( cen6          ),
-    .cen4       (               ),
+    .cen4       ( cen4          ),
     .cen3       (               ),
     .cen3q      (               ), // 1/4 advanced with respect to cen3
     .cen1p5     (               ),
@@ -137,6 +137,7 @@ jtbubl_main u_main(
     .rst            ( rst           ),
     .clk24          ( clk24         ),        // 24 MHz
     .cen6           ( cen6          ),
+    .cen4           ( cen4          ),
     //.cpu_cen        ( cpu_cen       ),
     // Main CPU ROM
     .main_rom_addr  ( main_addr     ),

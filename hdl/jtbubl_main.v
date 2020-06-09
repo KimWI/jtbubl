@@ -20,6 +20,7 @@ module jtbubl_main(
     input               rst,
     input               clk24,
     input               cen6,
+    input               cen4,
 
     // Cabinet inputs
     input      [ 1:0]   start_button,
@@ -79,11 +80,11 @@ wire [15:0] main_addr, sub_addr, mcu_addr;
 wire        main_mreq_n, main_iorq_n, main_rd_n, main_wrn, main_rfsh_n;
 wire        sub_mreq_n,  sub_iorq_n,  sub_rd_n,  sub_wrn, mcu_wrn;
 reg         rammcu_we, rammcu_cs;
-reg         main_comm_cs, main_mcu_cs, // shared memories
+reg         main_work_cs, main_mcu_cs, // shared memories
             tres_cs,  // watchdog reset
             main2sub_nmi,
             misc_cs, sound_cs;
-reg         sub_comm_cs;
+reg         sub_work_cs;
 wire        sub_we, main_we, mainmcu_we, sub_int_n, mcu2main_int_n,
             mcu_vma;
 reg  [ 2:0] bank;
@@ -95,9 +96,9 @@ assign      main_rom_addr = main_addr[15] ?
                         { { {1'b0, bank}+4'b10} , main_addr[13:0] } : // banked
                         { 3'd0, main_addr[14:0] }; // not banked
 assign      sub_rom_addr = sub_addr[14:0];
-assign      main_we      = main_comm_cs && !main_wrn && cen6;
+assign      main_we      = main_work_cs && !main_wrn && cen6;
 assign      mainmcu_we   = main_mcu_cs && !main_wrn && cen6;
-assign      sub_we       = sub_comm_cs && !sub_wrn && sub_rst_n;
+assign      sub_we       = sub_work_cs && !sub_wrn && sub_rst_n;
 assign      cpu_addr     = main_addr[12:0];
 assign      cpu_dout     = main_dout;
 assign      cpu_rnw      = main_wrn;
@@ -125,7 +126,7 @@ end
 always @(*) begin
     main_rom_cs    = !main_mreq_n && (!main_addr[15] || main_addr[15:14]==2'b10);
     vram_cs        = !main_mreq_n && main_addr[15:13]==3'b110;
-    main_comm_cs    = !main_mreq_n && main_addr[15:13]==3'b111 && main_addr[12:11]!=2'b11;
+    main_work_cs    = !main_mreq_n && main_addr[15:13]==3'b111 && main_addr[12:11]!=2'b11;
     pal_cs         = !main_mreq_n && main_addr[15: 9]==7'b1111_100;
     sound_cs       = !main_mreq_n && main_addr[15: 8]==8'hFA && !main_addr[7];
     tres_cs        = !main_mreq_n && main_addr[15: 8]==8'hFA && main_addr[7];
@@ -140,7 +141,7 @@ always @(posedge clk24) begin
         main_rom_cs ? main_rom_data : (
         vram_cs     ? vram_dout     : (
         pal_cs      ? pal_dout      : (
-        main_comm_cs? ram2main      : (
+        main_work_cs? ram2main      : (
         main_mcu_cs ? rammcu2main   : (
         !main_iorq_n? int_vector    : (
         sound_cs    ? 8'h00         : 8'hff
@@ -181,17 +182,17 @@ end
 // Sub CPU address decoder
 always @(*) begin
     sub_rom_cs     = !sub_mreq_n && !sub_addr[15];
-    sub_comm_cs    = !sub_mreq_n &&  sub_addr[15:13]==3'b111;
+    sub_work_cs    = !sub_mreq_n &&  sub_addr[15:13]==3'b111;
 end
 
 // Sub CPU input mux
 always @(posedge clk24) begin
     sub_din <= sub_rom_cs  ? sub_rom_data : (
-               sub_comm_cs ? ram2sub : 8'hff );
+               sub_work_cs ? ram2sub : 8'hff );
 end
 
 // Time shared
-jtframe_dual_ram #(.aw(13)) u_subshared(
+jtframe_dual_ram #(.aw(13)) u_work(
     .clk0   ( clk24           ),
     .clk1   ( clk24           ),
     // Port 0
@@ -216,8 +217,8 @@ reg  main_wait_n, sub_wait_n;
 reg  lde, sde; // original signal names: lde = main drives, sde = sub drives
 
 always @(*) begin
-    lwaitn = ~( sde & main_comm_cs );
-    swaitn = ~( lde & sub_comm_cs  );
+    lwaitn = ~( sde & main_work_cs );
+    swaitn = ~( lde & sub_work_cs  );
     main_wait_n = lwaitn & lrom_wait_n;
     sub_wait_n  = swaitn & srom_wait_n;
 end
@@ -226,7 +227,7 @@ always @(posedge clk24, negedge main_rst_n) begin
     if( !main_rst_n )
         lde <= 0;
     else begin
-        lde <= main_comm_cs;
+        lde <= main_work_cs;
     end
 end
 
@@ -234,9 +235,9 @@ always @(posedge clk24, negedge sub_rst_n) begin
     if( !sub_rst_n )
         sde <= 0;
     else begin
-        if( !sub_comm_cs )
+        if( !sub_work_cs )
             sde <= 0;
-        else if( !main_comm_cs ) sde <= 1;
+        else if( !main_work_cs ) sde <= 1;
     end
 end
 
@@ -370,7 +371,7 @@ reg [3:0] clrcnt;
 reg       last_sub_int_n;
 reg       mcuirq;
 
-wire      cen_mcu = cen6;
+wire      cen_mcu = cen4;
 
 always @(posedge clk24) begin
     if( mcu_rst ) begin
