@@ -19,6 +19,7 @@
 module jtbubl_main(
     input               rst,
     input               clk24,
+    input               cen12,
     input               cen6,
     input               cen4,
 
@@ -97,6 +98,11 @@ reg  [12:0] work_addr;
 reg         work_we;
 wire [ 7:0] work_dout;
 
+reg  [ 7:0] comm_din, comm2main, comm2mcu;
+reg  [ 9:0] comm_addr;
+reg         comm_we;
+wire [ 7:0] comm_dout;
+
 wire        lrom_wait_n, srom_wait_n;
 reg         lwaitn, swaitn;
 wire        main_halt_n;
@@ -153,7 +159,7 @@ always @(posedge clk24) begin
         vram_cs     ? vram_dout     : (
         pal_cs      ? pal_dout      : (
         main_work_cs? work_dout     : (
-        mcram_cs    ? rammcu2main   : (
+        mcram_cs    ? comm2main     : (
         !main_iorq_n? int_vector    : (
         sound_cs    ? 8'h00         : 8'hff
         ))))));
@@ -218,22 +224,6 @@ jtframe_ram #(.aw(13)) u_work(
     .q      ( work_dout       )
 );
 
-/*
-jtframe_dual_ram #(.aw(13)) u_work(
-    .clk0   ( clk24           ),
-    .clk1   ( clk24           ),
-    // Port 0
-    .data0  ( main_dout       ),
-    .addr0  ( main_addr[12:0] ),
-    .we0    ( main_we         ),
-    .q0     ( ram2main        ),
-    // Port 1
-    .data1  ( sub_dout        ),
-    .addr1  ( sub_addr[12:0]  ),
-    .we1    ( sub_we          ),
-    .q1     ( ram2sub         )
-);
-*/
 /////////////////////////////////////////
 // Main CPU
 
@@ -359,25 +349,35 @@ jtframe_ff u_mcu2main (
     //.sigedge( ~LVBL          )
 );
 
+always @(posedge clk24) begin
+    if( cen12 ) begin
+        if(cen6) begin
+            comm_addr <= main_addr[9:0];
+            comm_we   <= mcram_we;
+            comm_din  <= main_dout;
+            comm2mcu  <= comm_dout;
+        end else begin
+            comm_addr <= mcu_bus[9:0];
+            comm_we   <= rammcu_we;
+            comm_din  <= rammcu_din;
+            comm2main <= comm_dout;
+        end
+    end
+end
+
 // Time shared
-jtframe_dual_ram #(.aw(10)) u_comm(
-    .clk0   ( clk24            ),
-    .clk1   ( clk24            ),
-    // Port 0: Main CPU access
-    .data0  ( main_dout        ),
-    .addr0  ( main_addr[9:0]   ),
-    .we0    ( mcram_we         ),
-    .q0     ( rammcu2main      ),
-    // Port 1: MCU access
-    .data1  ( rammcu_din       ),
-    .addr1  ( mcu_bus[9:0]     ),
-    .we1    ( rammcu_we        ),
-    .q1     ( rammcu2mcu       )
+jtframe_ram #(.aw(10)) u_comm(
+    .clk    ( clk24            ),
+    .cen    ( 1'b1             ),
+    .data   ( comm_din         ),
+    .addr   ( comm_addr        ),
+    .we     ( comm_we          ),
+    .q      ( comm_dout        )
 );
 
 always @(posedge clk24) begin
     if( rammcu_cs )
-        p3_in <= rammcu2mcu;
+        p3_in <= comm2mcu;
     else begin
         case( mcu_bus[1:0] )
             2'd0: p3_in <= dipsw_a;

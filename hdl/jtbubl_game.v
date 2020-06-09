@@ -136,6 +136,7 @@ u_dwnld(
 jtbubl_main u_main(
     .rst            ( rst           ),
     .clk24          ( clk24         ),        // 24 MHz
+    .cen12          ( cen12         ),
     .cen6           ( cen6          ),
     .cen4           ( cen4          ),
     //.cpu_cen        ( cpu_cen       ),
