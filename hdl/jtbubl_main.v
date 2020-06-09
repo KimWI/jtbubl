@@ -92,6 +92,17 @@ reg         main_rst_n, sub_rst_n, mcu_rst;
 reg  [ 7:0] wdog_cnt, int_vector;
 reg         last_LVBL;
 
+reg  [ 7:0] work_din;
+reg  [12:0] work_addr;
+reg         work_we;
+wire [ 7:0] work_dout;
+
+wire        lrom_wait_n, srom_wait_n;
+reg         lwaitn, swaitn;
+wire        main_halt_n;
+reg         main_wait_n, sub_wait_n;
+reg         lde, sde; // original signal names: lde = main drives, sde = sub drives
+
 assign      main_rom_addr = main_addr[15] ?
                         { { {1'b0, bank}+4'b10} , main_addr[13:0] } : // banked
                         { 3'd0, main_addr[14:0] }; // not banked
@@ -141,7 +152,7 @@ always @(posedge clk24) begin
         main_rom_cs ? main_rom_data : (
         vram_cs     ? vram_dout     : (
         pal_cs      ? pal_dout      : (
-        main_work_cs? ram2main      : (
+        main_work_cs? work_dout     : (
         mcram_cs    ? rammcu2main   : (
         !main_iorq_n? int_vector    : (
         sound_cs    ? 8'h00         : 8'hff
@@ -188,10 +199,26 @@ end
 // Sub CPU input mux
 always @(posedge clk24) begin
     sub_din <= sub_rom_cs  ? sub_rom_data : (
-               sub_work_cs ? ram2sub : 8'hff );
+               sub_work_cs ? work_dout : 8'hff );
+end
+
+always @(*) begin
+    work_din = lde ? main_dout : sub_dout;
+    work_we  = lde ? ~main_wrn : ~sub_wrn;
+    work_addr= lde ? main_addr[12:0] : sub_addr[12:0];
 end
 
 // Time shared
+jtframe_ram #(.aw(13)) u_work(
+    .clk    ( clk24           ),
+    .cen    ( 1'b1            ),
+    .data   ( work_din        ),
+    .addr   ( work_addr       ),
+    .we     ( work_we         ),
+    .q      ( work_dout       )
+);
+
+/*
 jtframe_dual_ram #(.aw(13)) u_work(
     .clk0   ( clk24           ),
     .clk1   ( clk24           ),
@@ -206,15 +233,9 @@ jtframe_dual_ram #(.aw(13)) u_work(
     .we1    ( sub_we          ),
     .q1     ( ram2sub         )
 );
-
+*/
 /////////////////////////////////////////
 // Main CPU
-
-wire lrom_wait_n, srom_wait_n;
-reg  lwaitn, swaitn;
-wire main_halt_n;
-reg  main_wait_n, sub_wait_n;
-reg  lde, sde; // original signal names: lde = main drives, sde = sub drives
 
 always @(*) begin
     lwaitn = ~( sde & main_work_cs );
