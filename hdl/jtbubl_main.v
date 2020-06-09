@@ -70,7 +70,7 @@ module jtbubl_main(
 );
 
 reg  [ 7:0] main_din, sub_din;
-wire [ 7:0] ram2main, ram2sub, main_dout, sub_dout, mcu_dout,
+wire [ 7:0] ram2main, ram2sub, main_dout, sub_dout,
             rammcu2main, rammcu2mcu,
             p1_in,
             p1_out, p2_out, p3_out, p4_out;
@@ -78,14 +78,14 @@ reg  [ 7:0] p3_in, rammcu_din;
 wire [11:0] mcu_bus;
 wire [15:0] main_addr, sub_addr, mcu_addr;
 wire        main_mreq_n, main_iorq_n, main_rd_n, main_wrn, main_rfsh_n;
-wire        sub_mreq_n,  sub_iorq_n,  sub_rd_n,  sub_wrn, mcu_wrn;
+wire        sub_mreq_n,  sub_iorq_n,  sub_rd_n,  sub_wrn;
 reg         rammcu_we, rammcu_cs;
-reg         main_work_cs, main_mcu_cs, // shared memories
+reg         main_work_cs, mcram_cs, // shared memories
             tres_cs,  // watchdog reset
             main2sub_nmi,
             misc_cs, sound_cs;
 reg         sub_work_cs;
-wire        sub_we, main_we, mainmcu_we, sub_int_n, mcu2main_int_n,
+wire        sub_we, main_we, mcram_we, sub_int_n, mcu2main_int_n,
             mcu_vma;
 reg  [ 2:0] bank;
 reg         main_rst_n, sub_rst_n, mcu_rst;
@@ -97,7 +97,7 @@ assign      main_rom_addr = main_addr[15] ?
                         { 3'd0, main_addr[14:0] }; // not banked
 assign      sub_rom_addr = sub_addr[14:0];
 assign      main_we      = main_work_cs && !main_wrn && cen6;
-assign      mainmcu_we   = main_mcu_cs && !main_wrn && cen6;
+assign      mcram_we     = mcram_cs && !main_wrn && cen6;
 assign      sub_we       = sub_work_cs && !sub_wrn && sub_rst_n;
 assign      cpu_addr     = main_addr[12:0];
 assign      cpu_dout     = main_dout;
@@ -126,13 +126,13 @@ end
 always @(*) begin
     main_rom_cs    = !main_mreq_n && (!main_addr[15] || main_addr[15:14]==2'b10);
     vram_cs        = !main_mreq_n && main_addr[15:13]==3'b110;
-    main_work_cs    = !main_mreq_n && main_addr[15:13]==3'b111 && main_addr[12:11]!=2'b11;
+    main_work_cs   = !main_mreq_n && main_addr[15:13]==3'b111 && main_addr[12:11]!=2'b11;
     pal_cs         = !main_mreq_n && main_addr[15: 9]==7'b1111_100;
     sound_cs       = !main_mreq_n && main_addr[15: 8]==8'hFA && !main_addr[7];
     tres_cs        = !main_mreq_n && main_addr[15: 8]==8'hFA && main_addr[7];
     main2sub_nmi   = !main_mreq_n && main_addr[15: 8]==8'hFB && main_addr[7:6]==2'b00 && !main_wrn;
     misc_cs        = !main_mreq_n && main_addr[15: 8]==8'hFB && main_addr[7:6]==2'b01 && !main_wrn;
-    main_mcu_cs    = !main_mreq_n && main_addr[15:10]==6'b1111_11;
+    mcram_cs       = !main_mreq_n && main_addr[15:10]==6'b1111_11;
 end
 
 // Main CPU input mux
@@ -142,7 +142,7 @@ always @(posedge clk24) begin
         vram_cs     ? vram_dout     : (
         pal_cs      ? pal_dout      : (
         main_work_cs? ram2main      : (
-        main_mcu_cs ? rammcu2main   : (
+        mcram_cs    ? rammcu2main   : (
         !main_iorq_n? int_vector    : (
         sound_cs    ? 8'h00         : 8'hff
         ))))));
@@ -339,13 +339,13 @@ jtframe_ff u_mcu2main (
 );
 
 // Time shared
-jtframe_dual_ram #(.aw(10)) u_mcushared(
+jtframe_dual_ram #(.aw(10)) u_comm(
     .clk0   ( clk24            ),
     .clk1   ( clk24            ),
     // Port 0: Main CPU access
     .data0  ( main_dout        ),
     .addr0  ( main_addr[9:0]   ),
-    .we0    ( mainmcu_we       ),
+    .we0    ( mcram_we         ),
     .q0     ( rammcu2main      ),
     // Port 1: MCU access
     .data1  ( rammcu_din       ),
@@ -405,8 +405,8 @@ always @(posedge clk24) begin
         last_rammcu_clk <= rammcu_clk;
         if( mcu_posedge ) begin
             if( mcu_bus[11:10]==2'b11 ) begin
-                rammcu_cs <= 1;
-                rammcu_we <= !p1_out[7];
+                rammcu_cs  <= 1;
+                rammcu_we  <= !p1_out[7];
                 rammcu_din <= p3_out;
                 if( mcu_bus[9:0]==10'd0 ) int_vector <= p3_out;
             end else begin
@@ -425,10 +425,10 @@ jtframe_6801mcu #(.MAXPORT(7)) u_mcu (
     //.rst( rst ), // for quick sims
     .clk        ( clk24         ),
     .cen        ( cen_mcu       ),  // this should be cen4, but let's start easy
-    .wrn        ( mcu_wrn       ),
+    .wrn        (               ),
     .vma        ( mcu_vma       ),
     .addr       ( mcu_addr      ),
-    .dout       ( mcu_dout      ), 
+    .dout       (               ), 
     .halt       ( 1'b0          ),
     .halted     (               ),
     .irq        ( mcuirq        ), // relies on sub CPU to clear it

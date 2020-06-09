@@ -20,11 +20,11 @@ i8 = i1 = clk
 
 Outputs:
 
-12 (Combinatorial, Output feedback output, Active low)
+12 SCI (Combinatorial, Output feedback output, Active low)
 13 (Combinatorial, Output feedback output, Active low)
 14 (Registered, Output feedback registered, Active low)
 15 (Registered, Output feedback registered, Active low)
-16 (Registered, Output feedback registered, Active low)
+16 COMM access (Registered, Output feedback registered, Active low)
 17 (Registered, Output feedback registered, Active high)
 18 (Combinatorial, Output feedback output, Active low)
 19 (Combinatorial, Output feedback output, Active low)
@@ -35,28 +35,26 @@ Outputs:
 /o13 = low if MCU drives the memory
 /o18 = mux select. if low main CPU drives the memory
                   if high MCU drives the memory
-/o19 = unused
+/o19 = COMM RAM /WE
 
 Equations:
 
 /o12 = i4 & /rf14 +
        i4 & /i8 & /o13 & /rf15 & /rf16 & o18
-o12.oe = vcc
+/SCI = MCU_RD & /rf14 
 
 /o13 = i4 & rf14 & /rf15 & /rf16 & o18 +
        i2 & rf14 & /rf15 & /rf16 & o18
-o13.oe = vcc
 
 /rf14 := /rf15 +
          /i2 & /i3 & /rf14 +
          /i3 & /i7 & /rf14
-rf14.oe = OE
 
 /rf15 := i2 & i7 & /rf16
-rf15.oe = OE
+/rf15 := /MCRAM & /VECT
 
 /rf16 := i2 & /i3 & i7
-rf16.oe = OE
+/rf16 := /MCRAM & ~/SORAM & /VECT = COMM access
 
 rf17 := i2 & i7 +
         i5 & i6 & i7
