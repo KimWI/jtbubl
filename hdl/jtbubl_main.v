@@ -113,8 +113,8 @@ assign      main_rom_addr = main_addr[15] ?
                         { { {1'b0, bank}+4'b10} , main_addr[13:0] } : // banked
                         { 3'd0, main_addr[14:0] }; // not banked
 assign      sub_rom_addr = sub_addr[14:0];
-assign      main_we      = main_work_cs && !main_wrn && cen6;
-assign      mcram_we     = mcram_cs && !main_wrn && cen6;
+assign      main_we      = main_work_cs && !main_wrn;
+assign      mcram_we     = mcram_cs && !main_wrn;
 assign      sub_we       = sub_work_cs && !sub_wrn && sub_rst_n;
 assign      cpu_addr     = main_addr[12:0];
 assign      cpu_dout     = main_dout;
@@ -134,8 +134,8 @@ always @(posedge clk24, posedge rst) begin
         if( tres_cs )
             wdog_cnt <= 8'd0;
         else if( LVBL && !last_LVBL ) wdog_cnt <= wdog_cnt + 8'd1;
-        main_rst_n <= ~wdog_cnt[7];
-        //main_rst_n <= 1;
+        //main_rst_n <= ~wdog_cnt[7];
+        main_rst_n <= 1;
     end
 end
 
@@ -382,8 +382,8 @@ always @(posedge clk24) begin
         case( mcu_bus[1:0] )
             2'd0: p3_in <= dipsw_a;
             2'd1: p3_in <= dipsw_b;
-            2'd2: p3_in <= {1'b1, start_button[0], joystick1 };
-            2'd3: p3_in <= {1'b1, start_button[1], joystick2 };
+            2'd2: p3_in <= {1'b1, start_button[0], joystick1[5:2], joystick1[0], joystick1[1] };
+            2'd3: p3_in <= {1'b1, start_button[1], joystick2[5:2], joystick2[0], joystick2[1] };
         endcase // mcu_bus[1:0]
     end
 end
