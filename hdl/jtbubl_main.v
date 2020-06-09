@@ -79,11 +79,11 @@ wire [15:0] main_addr, sub_addr, mcu_addr;
 wire        main_mreq_n, main_iorq_n, main_rd_n, main_wrn, main_rfsh_n;
 wire        sub_mreq_n,  sub_iorq_n,  sub_rd_n,  sub_wrn, mcu_wrn;
 reg         rammcu_we, rammcu_cs;
-reg         main_sub_cs, main_mcu_cs, // shared memories
+reg         main_comm_cs, main_mcu_cs, // shared memories
             tres_cs,  // watchdog reset
             main2sub_nmi,
             misc_cs, sound_cs;
-reg         sub_main_cs;
+reg         sub_comm_cs;
 wire        sub_we, main_we, mainmcu_we, sub_int_n, mcu2main_int_n,
             mcu_vma;
 reg  [ 2:0] bank;
@@ -95,9 +95,9 @@ assign      main_rom_addr = main_addr[15] ?
                         { { {1'b0, bank}+4'b10} , main_addr[13:0] } : // banked
                         { 3'd0, main_addr[14:0] }; // not banked
 assign      sub_rom_addr = sub_addr[14:0];
-assign      main_we      = main_sub_cs && !main_wrn && cen6;
+assign      main_we      = main_comm_cs && !main_wrn && cen6;
 assign      mainmcu_we   = main_mcu_cs && !main_wrn && cen6;
-assign      sub_we       = sub_main_cs && !sub_wrn && sub_rst_n;
+assign      sub_we       = sub_comm_cs && !sub_wrn && sub_rst_n;
 assign      cpu_addr     = main_addr[12:0];
 assign      cpu_dout     = main_dout;
 assign      cpu_rnw      = main_wrn;
@@ -125,7 +125,7 @@ end
 always @(*) begin
     main_rom_cs    = !main_mreq_n && (!main_addr[15] || main_addr[15:14]==2'b10);
     vram_cs        = !main_mreq_n && main_addr[15:13]==3'b110;
-    main_sub_cs    = !main_mreq_n && main_addr[15:13]==3'b111 && main_addr[12:11]!=2'b11;
+    main_comm_cs    = !main_mreq_n && main_addr[15:13]==3'b111 && main_addr[12:11]!=2'b11;
     pal_cs         = !main_mreq_n && main_addr[15: 9]==7'b1111_100;
     sound_cs       = !main_mreq_n && main_addr[15: 8]==8'hFA && !main_addr[7];
     tres_cs        = !main_mreq_n && main_addr[15: 8]==8'hFA && main_addr[7];
@@ -135,12 +135,12 @@ always @(*) begin
 end
 
 // Main CPU input mux
-always @(*) begin
-    main_din = 
+always @(posedge clk24) begin
+    main_din <= 
         main_rom_cs ? main_rom_data : (
         vram_cs     ? vram_dout     : (
         pal_cs      ? pal_dout      : (
-        main_sub_cs ? ram2main      : (
+        main_comm_cs? ram2main      : (
         main_mcu_cs ? rammcu2main   : (
         !main_iorq_n? int_vector    : (
         sound_cs    ? 8'h00         : 8'hff
@@ -181,13 +181,13 @@ end
 // Sub CPU address decoder
 always @(*) begin
     sub_rom_cs     = !sub_mreq_n && !sub_addr[15];
-    sub_main_cs    = !sub_mreq_n &&  sub_addr[15:13]==3'b111;
+    sub_comm_cs    = !sub_mreq_n &&  sub_addr[15:13]==3'b111;
 end
 
 // Sub CPU input mux
-always @(*) begin
-    sub_din = sub_rom_cs  ? sub_rom_data : (
-              sub_main_cs ? ram2sub : 8'hff );
+always @(posedge clk24) begin
+    sub_din <= sub_rom_cs  ? sub_rom_data : (
+               sub_comm_cs ? ram2sub : 8'hff );
 end
 
 // Time shared
@@ -209,7 +209,36 @@ jtframe_dual_ram #(.aw(13)) u_subshared(
 /////////////////////////////////////////
 // Main CPU
 
-wire main_halt_n, main_wait_n, sub_wait_n;
+wire lrom_wait_n, srom_wait_n;
+reg  lwaitn, swaitn;
+wire main_halt_n;
+reg  main_wait_n, sub_wait_n;
+reg  lde, sde; // original signal names: lde = main drives, sde = sub drives
+
+always @(*) begin
+    lwaitn = ~( sde & main_comm_cs );
+    swaitn = ~( lde & sub_comm_cs  );
+    main_wait_n = lwaitn & lrom_wait_n;
+    sub_wait_n  = swaitn & srom_wait_n;
+end
+
+always @(posedge clk24, negedge main_rst_n) begin
+    if( !main_rst_n )
+        lde <= 0;
+    else begin
+        lde <= main_comm_cs;
+    end
+end
+
+always @(posedge clk24, negedge sub_rst_n) begin
+    if( !sub_rst_n )
+        sde <= 0;
+    else begin
+        if( !sub_comm_cs )
+            sde <= 0;
+        else if( !main_comm_cs ) sde <= 1;
+    end
+end
 
 jtframe_z80 u_maincpu(
     .rst_n    ( main_rst_n     ),
@@ -237,7 +266,7 @@ jtframe_rom_wait u_mainwait(
     .clk      ( clk24           ),
     .cen_in   (                 ),
     .cen_out  (                 ),
-    .gate     ( main_wait_n     ),
+    .gate     ( lrom_wait_n     ),
     // manage access to ROM data from SDRAM
     .rom_cs   ( main_rom_cs     ),
     .rom_ok   ( main_rom_ok     )
@@ -272,7 +301,7 @@ jtframe_rom_wait u_subwait(
     .clk      ( clk24           ),
     .cen_in   (                 ),
     .cen_out  (                 ),
-    .gate     ( sub_wait_n      ),
+    .gate     ( srom_wait_n     ),
     // manage access to ROM data from SDRAM
     .rom_cs   ( sub_rom_cs      ),
     .rom_ok   ( sub_rom_ok      )
@@ -324,15 +353,15 @@ jtframe_dual_ram #(.aw(10)) u_mcushared(
     .q1     ( rammcu2mcu       )
 );
 
-always @(*) begin
+always @(posedge clk24) begin
     if( rammcu_cs )
-        p3_in = rammcu2mcu;
+        p3_in <= rammcu2mcu;
     else begin
         case( mcu_bus[1:0] )
-            2'd0: p3_in = dipsw_a;
-            2'd1: p3_in = dipsw_b;
-            2'd2: p3_in = {1'b1, start_button[0], joystick1 };
-            2'd3: p3_in = {1'b1, start_button[1], joystick2 };
+            2'd0: p3_in <= dipsw_a;
+            2'd1: p3_in <= dipsw_b;
+            2'd2: p3_in <= {1'b1, start_button[0], joystick1 };
+            2'd3: p3_in <= {1'b1, start_button[1], joystick2 };
         endcase // mcu_bus[1:0]
     end
 end

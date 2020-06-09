@@ -124,6 +124,15 @@ Inputs:
 
 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 13, 14, 15, 16, 17, 18
 
+i1  = LA12
+i2  = /LMR
+i3  = /LWR
+i4  = SBA12
+i5  = SBA13
+i6  = SBA14
+i7  = /SBMR
+i8  = /SBWR
+i9  = /LRD
 i11 = /WORK
 i17 = CLK
 
@@ -150,14 +159,14 @@ Equations:
 /LDE
 
 /o14 = /i2 & /i7 & /i11 & o13 & /o15
-/WAIT = 
+/WAIT = /LMR & /SBMR & /WORK & ~/LDE & /SDE
 
 /o15 = i6 & /i7 & o13 & /o15 +
        i6 & /i7 & o13 & o15 & /i17
 /SDE
 
 /o16 = /i2 & i6 & /i7 & /i11 & /o13 & o15
-/SBWAIT = 
+/SBWAIT = /LMR & SBA14 & /SBMR & /WORK & /LDE & ~/SDE
 
 /o18 = /i3 & /i11 & o15 +
        i6 & /i7 & /i8 & o13 & o16 +
