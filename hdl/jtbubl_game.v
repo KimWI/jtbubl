@@ -71,11 +71,11 @@ module jtbubl_game(
 
 wire        main_cs, sub_cs, mcu_cs, snd_cs, gfx_cs;
 wire        main_ok, sub_ok, mcu_ok, snd_ok, gfx_ok;
-wire        snd_rst, black_n, flip;
+wire        snd_rstn, black_n, flip;
 wire [31:0] gfx_data;
 wire [17:0] gfx_addr;
 
-wire [ 7:0] main_data, sub_data, mcu_data, snd_data, snd_latch;
+wire [ 7:0] main_data, sub_data, mcu_data, snd_data, snd_latch, main_latch;
 wire [14:0] snd_addr, sub_addr;
 wire [11:0] mcu_addr;
 wire [17:0] main_addr;
@@ -158,7 +158,8 @@ jtbubl_main u_main(
 
     // Sound
     .snd_latch      ( snd_latch     ),
-    .snd_rst        ( snd_rst       ),
+    .main_latch     ( main_latch    ),
+    .snd_rstn       ( snd_rstn      ),
     // cabinet I/O
     .start_button   ( start_button  ),
     .coin_input     ( coin_input    ),
@@ -233,10 +234,12 @@ jtbubl_video u_video(
 `ifndef NOSOUND
 jtbubl_sound u_sound(
     .clk        ( clk24         ), // 24 MHz
-    .rst        ( snd_rst       ),
-    .cen12      ( cen12         ),
+    .rstn       ( snd_rstn      ),
+    .cen3       ( cen3          ),
     // communication with main CPU
     .snd_latch  ( snd_latch     ),
+    .main_latch ( main_latch    ),
+    .main_flag  (               ),
     // ROM
     .rom_addr   ( snd_addr      ),
     .rom_cs     ( snd_cs        ),
@@ -244,8 +247,7 @@ jtbubl_sound u_sound(
     .rom_ok     ( snd_ok        ),
 
     // Sound output
-    .snd_left   ( snd_left      ),
-    .snd_right  ( snd_right     ),
+    .snd        ( snd           ),
     .sample     ( sample        )
 );
 `else 
