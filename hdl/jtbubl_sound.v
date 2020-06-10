@@ -54,7 +54,7 @@ wire signed [ 9:0] psg2x; // DC-removed version of psg0
 
 assign int_n      = intn_fm0 & intn_fm1;
 assign rom_addr   = A[14:0];
-assign nmi_n      = snd_flag | ~nmi_en;
+assign nmi_n      = ~(snd_flag & nmi_en);
 assign flag_clr   = io_cs && !rd_n && A[1:0]==2'b0;
 
 always @(*) begin
