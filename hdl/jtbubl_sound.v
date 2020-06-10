@@ -159,47 +159,37 @@ jt12_mixer #(.w0(16),.w1(16),.w2(10),.w3(8),.wout(16)) u_mixer(
 
 jt03 u_2203(
     .rst        ( ~rstn      ),
-    // CPU interface
     .clk        ( clk        ),
     .cen        ( cen3       ),
     .din        ( dout       ),
+    .dout       ( fm0_dout   ),
     .addr       ( A[0]       ),
     .cs_n       ( ~fm0_cs    ),
     .wr_n       ( wr_n       ),
     .psg_snd    ( psg_snd    ),
     .fm_snd     ( fm0_snd    ),
     .snd_sample ( sample     ),
-    // unused outputs
-    .dout       ( fm0_dout   ),
     .irq_n      ( intn_fm0   ),
+    // unused outputs
     .psg_A      (            ),
     .psg_B      (            ),
     .psg_C      (            ),
     .snd        (            )
 );
 
-jt03 u_fake(
-    .rst    ( ~rstn      ),
-    // CPU interface
-    .clk    ( clk        ),
-    .cen    ( cen3       ),
-    .din    ( dout       ),
-    .addr   ( A[0]       ),
-    .cs_n   ( ~fm1_cs    ),
-    .wr_n   ( wr_n       ),
-    .psg_snd(            ),
-    .fm_snd (            ),
-    .snd_sample (        ),
-    // unused outputs
-    .dout   ( fm1_dout   ),
-    .irq_n  ( intn_fm1   ),
-    .psg_A  (),
-    .psg_B  (),
-    .psg_C  (),
-    .snd    ()
+jtopl u_opl(
+    .rst        ( ~rstn      ),
+    .clk        ( clk        ),
+    .cen        ( cen3       ),
+    .din        ( dout       ),
+    .dout       ( fm1_dout   ),
+    .addr       ( A[0]       ),
+    .cs_n       ( ~fm1_cs    ),
+    .wr_n       ( wr_n       ),
+    .irq_n      ( intn_fm1   ),
+    .snd        ( fm1_snd    ),
+    .sample     ( sample     )
 );
-
-assign fm1_snd = 16'd0;
 
 `ifdef SIMULATION
     integer fsnd;

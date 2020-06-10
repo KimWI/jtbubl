@@ -24,3 +24,8 @@
 ../../modules/jtframe/hdl/sdram/jtframe_gatecen.v
 ../../modules/jt12/jt49/hdl/filter/jt49_dcrm2.v
 ../../modules/jt12/hdl/mixer/jt12_mixer.v
+
+../../modules/jtopl/hdl/jtopl.v
+../../modules/jtopl/hdl/jtopl_mmr.v
+../../modules/jtopl/hdl/jtopl_div.v
+../../modules/jtopl/hdl/jtopl_timers.v
