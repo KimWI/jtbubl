@@ -79,7 +79,8 @@ wire [ 7:0] main_data, sub_data, mcu_data, snd_data, snd_latch, main_latch;
 wire [14:0] snd_addr, sub_addr;
 wire [11:0] mcu_addr;
 wire [17:0] main_addr;
-wire        cen12, cen6, cen4, prom_we;
+wire        cen12, cen6, cen4, cen3, prom_we;
+wire        snd_stb;
 
 wire [ 7:0] dipsw_a, dipsw_b;
 wire        LHBL, LVBL;
@@ -106,7 +107,7 @@ jtframe_cen24 u_cen(
     .cen12      ( cen12         ),
     .cen6       ( cen6          ),
     .cen4       ( cen4          ),
-    .cen3       (               ),
+    .cen3       ( cen3          ),
     .cen3q      (               ), // 1/4 advanced with respect to cen3
     .cen1p5     (               ),
     // 180 shifted signals
@@ -158,6 +159,7 @@ jtbubl_main u_main(
 
     // Sound
     .snd_latch      ( snd_latch     ),
+    .snd_stb        ( snd_stb       ),
     .main_latch     ( main_latch    ),
     .snd_rstn       ( snd_rstn      ),
     // cabinet I/O
@@ -238,6 +240,7 @@ jtbubl_sound u_sound(
     .cen3       ( cen3          ),
     // communication with main CPU
     .snd_latch  ( snd_latch     ),
+    .snd_stb    ( snd_stb       ),
     .main_latch ( main_latch    ),
     .main_flag  (               ),
     // ROM

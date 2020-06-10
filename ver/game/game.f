@@ -3,6 +3,7 @@
 ../../hdl/jtbubl_gfx.v
 ../../hdl/jtbubl_colmix.v
 ../../hdl/jtbubl_main.v
+../../hdl/jtbubl_sound.v
 
 ../../modules/jtframe/hdl/video/jtframe_vtimer.v
 ../../modules/jtframe/hdl/video/jtframe_blank.v
@@ -21,3 +22,5 @@
 ../../modules/jtframe/hdl/jtframe_z80wait.v
 ../../modules/jtframe/hdl/jtframe_ff.v
 ../../modules/jtframe/hdl/sdram/jtframe_gatecen.v
+../../modules/jt12/jt49/hdl/filter/jt49_dcrm2.v
+../../modules/jt12/hdl/mixer/jt12_mixer.v

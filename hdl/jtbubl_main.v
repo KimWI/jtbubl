@@ -44,6 +44,7 @@ module jtbubl_main(
     // Sound interface
     input      [ 7:0]   main_latch,
     output reg [ 7:0]   snd_latch,
+    output reg          snd_stb,
     output reg          snd_rstn, // active high
 
     // Main CPU ROM interface
@@ -187,13 +188,15 @@ always @(posedge clk24 ) begin
     if( !main_rst_n ) begin
         snd_latch <= 8'd0;
         snd_rstn  <= 0;
+        snd_stb   <= 0;
     end else if(sound_cs) begin
+        snd_stb <= !main_wrn && cpu_addr[1:0]==2'b00;
         if( !main_wrn )
-        case( cpu_addr[1:0] )
-            2'b00: snd_latch <= main_dout;
-            2'b11: snd_rstn  <= ~main_dout[0];
-        endcase
-    end
+            case( cpu_addr[1:0] )
+                2'b00: snd_latch <= main_dout;
+                2'b11: snd_rstn  <= ~main_dout[0];
+            endcase
+    end else snd_stb <= 0;
 end
 
 // Sub CPU address decoder
