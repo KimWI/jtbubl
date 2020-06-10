@@ -45,6 +45,9 @@ module jtbubl_main(
     input      [ 7:0]   main_latch,
     output reg [ 7:0]   snd_latch,
     output reg          snd_stb,
+    input               snd_flag,
+    input               main_stb,
+    output              main_flag,
     output reg          snd_rstn, // active high
 
     // Main CPU ROM interface
@@ -162,7 +165,9 @@ always @(posedge clk24) begin
         main_work_cs? work_dout     : (
         mcram_cs    ? comm2main     : (
         !main_iorq_n? int_vector    : (
-        sound_cs    ? 8'h00         : 8'hff
+        sound_cs    ? (
+            main_addr[0] ? { 6'h3f, main_flag, snd_flag } : main_latch )
+            : 8'hff
         ))))));
 end
 
@@ -198,6 +203,18 @@ always @(posedge clk24 ) begin
             endcase
     end else snd_stb <= 0;
 end
+
+jtframe_ff u_flag(
+    .clk    ( clk24                  ),
+    .rst    ( main_rst_n             ),
+    .cen    ( 1'b1                   ),
+    .din    ( 1'b0                   ),
+    .q      (                        ),
+    .qn     ( main_flag              ),
+    .set    ( sound_cs && !main_rd_n ),
+    .clr    ( 1'b0                   ),
+    .sigedge( main_stb               )
+);
 
 // Sub CPU address decoder
 always @(*) begin

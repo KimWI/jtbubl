@@ -24,7 +24,9 @@ module jtbubl_sound(
     input      [ 7:0] snd_latch,
     input             snd_stb,
     output reg [ 7:0] main_latch,    
-    output reg        main_flag,
+    output reg        main_stb,
+    output            snd_flag,
+    input             main_flag,
     // ROM
     output     [14:0] rom_addr,
     output  reg       rom_cs,
@@ -39,9 +41,8 @@ module jtbubl_sound(
 wire        [15:0] A;
 wire               iorq_n, m1_n, wr_n, rd_n;
 wire        [ 7:0] ram_dout, dout, fm0_dout, fm1_dout;
-reg                ram_cs, fm1_cs, fm0_cs, latch_cs, io_cs, nmi_en;
+reg                ram_cs, fm1_cs, fm0_cs, io_cs, nmi_en;
 wire               mreq_n, rfsh_n;
-wire               snd_flag;
 reg         [ 7:0]  din;
 wire               intn_fm0, intn_fm1;
 wire               int_n;
@@ -51,53 +52,48 @@ wire signed [15:0] fm0_snd,  fm1_snd;
 wire        [ 9:0] psg_snd;
 wire signed [ 9:0] psg2x; // DC-removed version of psg0
 
-assign int_n      = intn_fm0;
+assign int_n      = intn_fm0 & intn_fm1;
 assign rom_addr   = A[14:0];
-assign fm1_dout   = 8'h00;
 assign nmi_n      = snd_flag | ~nmi_en;
 assign flag_clr   = io_cs && !rd_n && A[1:0]==2'b0;
 
 always @(*) begin
-    rom_cs = !mreq_n && A[15];
-    ram_cs = !mreq_n && !A[15] && A[14:13]==2'b00;
-    fm0_cs = !mreq_n && !A[15] && A[14:13]==2'b01;
-    fm1_cs = !mreq_n && !A[15] && A[14:13]==2'b10;
-    io_cs  = !mreq_n && !A[15] && A[14:13]==2'b11;
+    rom_cs = !mreq_n && !A[15];
+    ram_cs = !mreq_n &&  A[15] && A[14:12]==3'b00;
+    fm0_cs = !mreq_n &&  A[15] && A[14:12]==3'b01;
+    fm1_cs = !mreq_n &&  A[15] && A[14:12]==3'b10;
+    io_cs  = !mreq_n &&  A[15] && A[14:12]==3'b11;
 end
 
 always @(posedge clk) begin
-    if( io_cs && !rd_n )
-        din <= A[1] ? 8'hff : (
-            A[0] ? {7'hf,snd_flag} : snd_latch);
-    else begin
-        case( 1'b1 )
-            rom_cs:   din <= rom_data;
-            fm0_cs:   din <= fm0_dout;
-            fm1_cs:   din <= fm1_dout;
-            latch_cs: din <= snd_latch;
-            ram_cs:   din <= ram_dout;
-            default:  din <= 8'hff;
-        endcase
-    end
+    case( 1'b1 )
+        rom_cs:   din <= rom_data;
+        fm0_cs:   din <= fm0_dout;
+        fm1_cs:   din <= fm1_dout;
+        io_cs:    din <= A[1] ? 8'hff : (
+                         A[0] ? {6'h3f, main_stb, snd_flag} : snd_latch);
+        ram_cs:   din <= ram_dout;
+        default:  din <= 8'hff;
+    endcase
 end
 
 always @(posedge clk, negedge rstn) begin
     if( !rstn ) begin
         main_latch <= 8'h00;
-        main_flag  <= 0;
+        main_stb   <= 0;
         nmi_en     <= 0;
     end else begin
         if( io_cs && !wr_n ) begin
             case( A[1:0] )
                 2'd0: begin
                     main_latch <= dout;
-                    main_flag  <= 1;
+                    main_stb   <= 1;
                 end
                 2'd1: nmi_en     <= 1; // enables NMI
                 2'd2: nmi_en     <= 0;
             endcase
         end else begin
-            main_flag <= 0;
+            main_stb <= 0;
         end
     end
 end
@@ -133,7 +129,7 @@ jtframe_sysz80 #(.RAM_AW(13)) u_cpu(
     .A          ( A           ),
     .cpu_din    ( din         ),
     .cpu_dout   ( dout        ),
-    .ram_dout   (             ),
+    .ram_dout   ( ram_dout    ),
     .ram_cs     ( ram_cs      ),
     .rom_cs     ( rom_cs      ),
     .rom_ok     ( rom_ok      )
@@ -162,20 +158,41 @@ jt12_mixer #(.w0(16),.w1(16),.w2(10),.w3(8),.wout(16)) u_mixer(
 );
 
 jt03 u_2203(
+    .rst        ( ~rstn      ),
+    // CPU interface
+    .clk        ( clk        ),
+    .cen        ( cen3       ),
+    .din        ( dout       ),
+    .addr       ( A[0]       ),
+    .cs_n       ( ~fm0_cs    ),
+    .wr_n       ( wr_n       ),
+    .psg_snd    ( psg_snd    ),
+    .fm_snd     ( fm0_snd    ),
+    .snd_sample ( sample     ),
+    // unused outputs
+    .dout       ( fm0_dout   ),
+    .irq_n      ( intn_fm0   ),
+    .psg_A      (            ),
+    .psg_B      (            ),
+    .psg_C      (            ),
+    .snd        (            )
+);
+
+jt03 u_fake(
     .rst    ( ~rstn      ),
     // CPU interface
     .clk    ( clk        ),
     .cen    ( cen3       ),
     .din    ( dout       ),
     .addr   ( A[0]       ),
-    .cs_n   ( ~fm0_cs    ),
+    .cs_n   ( ~fm1_cs    ),
     .wr_n   ( wr_n       ),
-    .psg_snd( psg_snd    ),
-    .fm_snd ( fm0_snd    ),
-    .snd_sample ( sample ),
+    .psg_snd(            ),
+    .fm_snd (            ),
+    .snd_sample (        ),
     // unused outputs
-    .dout   ( fm0_dout   ),
-    .irq_n  ( intn_fm0   ),
+    .dout   ( fm1_dout   ),
+    .irq_n  ( intn_fm1   ),
     .psg_A  (),
     .psg_B  (),
     .psg_C  (),

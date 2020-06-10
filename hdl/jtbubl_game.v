@@ -160,6 +160,9 @@ jtbubl_main u_main(
     // Sound
     .snd_latch      ( snd_latch     ),
     .snd_stb        ( snd_stb       ),
+    .snd_flag       ( snd_flag      ),
+    .main_stb       ( main_stb      ),
+    .main_flag      ( main_flag     ),
     .main_latch     ( main_latch    ),
     .snd_rstn       ( snd_rstn      ),
     // cabinet I/O
@@ -240,9 +243,11 @@ jtbubl_sound u_sound(
     .cen3       ( cen3          ),
     // communication with main CPU
     .snd_latch  ( snd_latch     ),
-    .snd_stb    ( snd_stb       ),
     .main_latch ( main_latch    ),
-    .main_flag  (               ),
+    .snd_stb    ( snd_stb       ),
+    .main_stb   ( main_stb      ),
+    .snd_flag   ( snd_flag      ),
+    .main_flag  ( main_flag     ),
     // ROM
     .rom_addr   ( snd_addr      ),
     .rom_cs     ( snd_cs        ),
