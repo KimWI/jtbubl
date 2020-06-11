@@ -29,8 +29,12 @@ set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../modu
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../modules/jtframe/hdl/cpu/jtframe_z80.v     ]
 
 # JT03 (YM2203)
-set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../modules/jtframe/hdl/sound/jtframe_mixer.v  ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../modules/jt12/hdl/mixer/jt12_mixer.v  ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../modules/jt12/jt49/hdl/filter/jt49_dcrm2.v  ]
 set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) ../modules/jt12/hdl/jt03.qip   ]
+
+# JTOPL (YM3526)
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) ../modules/jtopl/hdl/jt26.qip   ]
 
 # MCU
 set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) ../modules/jtframe/hdl/cpu/6801_core.sv         ]
