@@ -17,7 +17,8 @@
     Date: 02-06-2020 */
 
 module jtbubl_sound(
-    input             rstn,
+    input             rst,    // System reset
+    input             rstn,   // from Main
     input             clk,
     input             cen3,   //  3   MHz
     // Interface with main CPU
@@ -51,11 +52,12 @@ wire               nmi_n;
 wire signed [15:0] fm0_snd,  fm1_snd;
 wire        [ 9:0] psg_snd;
 wire signed [ 9:0] psg2x; // DC-removed version of psg0
+wire               snd_rstn = ~rst & rstn;
 
 assign int_n      = intn_fm0 & intn_fm1;
 assign rom_addr   = A[14:0];
-assign nmi_n      = ~(snd_flag & nmi_en);
-assign flag_clr   = io_cs && !rd_n && A[1:0]==2'b0;
+assign nmi_n      = snd_flag | ~nmi_en;
+assign flag_clr   = (io_cs && !rd_n && A[1:0]==2'b0) || ~snd_rstn;
 
 always @(*) begin
     rom_cs = !mreq_n && !A[15];
@@ -77,8 +79,8 @@ always @(posedge clk) begin
     endcase
 end
 
-always @(posedge clk, negedge rstn) begin
-    if( !rstn ) begin
+always @(posedge clk, negedge snd_rstn) begin
+    if( !snd_rstn ) begin
         main_latch <= 8'h00;
         main_stb   <= 0;
         nmi_en     <= 0;
@@ -100,18 +102,18 @@ end
 
 jtframe_ff u_flag(
     .clk    ( clk      ),
-    .rst    ( ~rstn    ),
+    .rst    ( rst      ),
     .cen    ( 1'b1     ),
-    .din    ( 1'b0     ),
+    .din    ( 1'b1     ),
     .q      (          ),
     .qn     ( snd_flag ),
-    .set    ( flag_clr ),
-    .clr    ( 1'b0     ),
+    .set    ( 1'b0     ),
+    .clr    ( flag_clr ),
     .sigedge( snd_stb  )
 );
 
 jtframe_sysz80 #(.RAM_AW(13)) u_cpu(
-    .rst_n      ( rstn        ),
+    .rst_n      ( snd_rstn    ),
     .clk        ( clk         ),
     .cen        ( cen3        ),
     .cpu_cen    (             ),
@@ -138,7 +140,7 @@ jtframe_sysz80 #(.RAM_AW(13)) u_cpu(
 jt49_dcrm2 #(.sw(10)) u_dcrm (
     .clk    (  clk      ),
     .cen    (  cen3     ),
-    .rst    (  ~rstn    ),
+    .rst    (  rst      ),
     .din    (  psg_snd  ),
     .dout   (  psg2x    )
 );
@@ -158,7 +160,7 @@ jt12_mixer #(.w0(16),.w1(16),.w2(10),.w3(8),.wout(16)) u_mixer(
 );
 
 jt03 u_2203(
-    .rst        ( ~rstn      ),
+    .rst        ( ~snd_rstn  ),
     .clk        ( clk        ),
     .cen        ( cen3       ),
     .din        ( dout       ),
@@ -178,7 +180,7 @@ jt03 u_2203(
 );
 
 jtopl u_opl(
-    .rst        ( ~rstn      ),
+    .rst        ( ~snd_rstn  ),
     .clk        ( clk        ),
     .cen        ( cen3       ),
     .din        ( dout       ),

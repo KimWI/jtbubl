@@ -82,7 +82,7 @@ wire [ 7:0] ram2main, ram2sub, main_dout, sub_dout,
 reg  [ 7:0] p3_in, rammcu_din;
 wire [11:0] mcu_bus;
 wire [15:0] main_addr, sub_addr, mcu_addr;
-wire        main_mreq_n, main_iorq_n, main_rd_n, main_wrn, main_rfsh_n;
+wire        main_mreq_n, main_iorq_n, main_rdn, main_wrn, main_rfsh_n;
 wire        sub_mreq_n,  sub_iorq_n,  sub_rd_n,  sub_wrn;
 reg         rammcu_we, rammcu_cs;
 reg         main_work_cs, mcram_cs, // shared memories
@@ -192,7 +192,7 @@ end
 always @(posedge clk24 ) begin
     if( !main_rst_n ) begin
         snd_latch <= 8'd0;
-        snd_rstn  <= 0;
+        snd_rstn  <= 1;     // Sound CPU starts up
         snd_stb   <= 0;
     end else if(sound_cs) begin
         snd_stb <= !main_wrn && cpu_addr[1:0]==2'b00;
@@ -211,7 +211,7 @@ jtframe_ff u_flag(
     .din    ( 1'b0                   ),
     .q      (                        ),
     .qn     ( main_flag              ),
-    .set    ( sound_cs && !main_rd_n ),
+    .set    ( sound_cs && !main_rdn  ),
     .clr    ( 1'b0                   ),
     .sigedge( main_stb               )
 );
@@ -283,7 +283,7 @@ jtframe_z80 u_maincpu(
     .m1_n     (                ),
     .mreq_n   ( main_mreq_n    ),
     .iorq_n   ( main_iorq_n    ),
-    .rd_n     ( main_rd_n      ),
+    .rd_n     ( main_rdn       ),
     .wr_n     ( main_wrn       ),
     .rfsh_n   ( main_rfsh_n    ),
     .halt_n   ( main_halt_n    ),

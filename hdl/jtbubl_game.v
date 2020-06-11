@@ -239,7 +239,9 @@ jtbubl_video u_video(
 `ifndef NOSOUND
 jtbubl_sound u_sound(
     .clk        ( clk24         ), // 24 MHz
-    .rstn       ( snd_rstn      ),
+    .rst        ( rst           ),
+    //.rstn       ( snd_rstn      ),
+    .rstn       ( 1'b1          ),
     .cen3       ( cen3          ),
     // communication with main CPU
     .snd_latch  ( snd_latch     ),
