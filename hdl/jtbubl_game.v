@@ -265,6 +265,8 @@ assign snd_cs   = 0;
 assign snd_addr = 15'd0;
 assign snd      = 16'd0;
 assign sample   = 0;
+assign snd_flag = 0;
+assign main_stb = 0;
 `endif
 
 jtframe_rom #(

@@ -80,6 +80,7 @@ wire [ 7:0] ram2main, ram2sub, main_dout, sub_dout,
             p1_in,
             p1_out, p2_out, p3_out, p4_out;
 reg  [ 7:0] p3_in, rammcu_din;
+reg         h1;
 wire [11:0] mcu_bus;
 wire [15:0] main_addr, sub_addr, mcu_addr;
 wire        main_mreq_n, main_iorq_n, main_rdn, main_wrn, main_rfsh_n;
@@ -247,10 +248,21 @@ jtframe_ram #(.aw(13)) u_work(
 /////////////////////////////////////////
 // Main CPU
 
+// H1 is used on the original PCB to divide access to the
+// video memory
+// When H1 is high, the main CPU is forced to wait before
+// accessing the VRAM
+
+always @(posedge clk24, posedge rst) begin
+    if( rst )
+        h1 <= 0;
+    else if(cen6) h1<=~h1;
+end
+
 always @(*) begin
     lwaitn = ~( sde & main_work_cs );
     swaitn = ~( lde & sub_work_cs  );
-    main_wait_n = lwaitn & lrom_wait_n;
+    main_wait_n = lwaitn & lrom_wait_n & ~(vram_cs&h1);
     sub_wait_n  = swaitn & srom_wait_n;
 end
 
