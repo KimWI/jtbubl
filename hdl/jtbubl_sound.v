@@ -152,9 +152,9 @@ jt12_mixer #(.w0(16),.w1(16),.w2(10),.w3(8),.wout(16)) u_mixer(
     .ch1    ( fm1_snd      ),
     .ch2    ( psg2x        ),
     .ch3    ( 8'd0         ),
-    .gain0  ( 8'h10        ),
+    .gain0  ( 8'h80        ),
     .gain1  ( 8'h10        ),
-    .gain2  ( 8'h10        ),
+    .gain2  ( 8'h80        ),
     .gain3  ( 8'd0         ),
     .mixed  ( snd          )
 );

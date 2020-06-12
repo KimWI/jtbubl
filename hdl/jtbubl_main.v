@@ -96,7 +96,7 @@ wire        sub_we, main_we, mcram_we, sub_int_n, mcu2main_int_n,
 reg  [ 2:0] bank;
 reg         main_rst_n, sub_rst_n, mcu_rst;
 reg  [ 7:0] wdog_cnt, int_vector;
-reg         last_LVBL;
+reg         last_VBL;
 
 reg  [ 7:0] work_din;
 reg  [12:0] work_addr;
@@ -113,7 +113,9 @@ reg         lwaitn, swaitn;
 wire        main_halt_n;
 reg         main_wait_n, sub_wait_n;
 reg         lde, sde; // original signal names: lde = main drives, sde = sub drives
+wire        VBL_gated;
 
+assign      VBL_gated    = ~LVBL & dip_pause;
 assign      main_rom_addr = main_addr[15] ?
                         { { {1'b0, bank}+4'b10} , main_addr[13:0] } : // banked
                         { 3'd0, main_addr[14:0] }; // not banked
@@ -135,10 +137,10 @@ always @(posedge clk24, posedge rst) begin
         main_rst_n <= 0;
         wdog_cnt   <= 8'd0;
     end else begin
-        last_LVBL  <= LVBL;
+        last_VBL  <= VBL_gated;
         if( tres_cs )
             wdog_cnt <= 8'd0;
-        else if( LVBL && !last_LVBL ) wdog_cnt <= wdog_cnt + 8'd1;
+        else if( !VBL_gated && last_VBL ) wdog_cnt <= wdog_cnt + 8'd1;
         //main_rst_n <= ~wdog_cnt[7];
         main_rst_n <= 1;
     end
@@ -360,7 +362,7 @@ jtframe_ff u_subint(
     .qn     ( sub_int_n     ),
     .set    ( 1'b0          ),
     .clr    ( ~sub_iorq_n   ),
-    .sigedge( ~LVBL         ) 
+    .sigedge( VBL_gated     ) 
 );
 
 /////////////////////////////////////////
@@ -378,7 +380,6 @@ jtframe_ff u_mcu2main (
     // This is a jumper on the schematics
     // it can come from P1[6] or from VBL
     .sigedge( p1_out[6]      )
-    //.sigedge( ~LVBL          )
 );
 
 always @(posedge clk24) begin
