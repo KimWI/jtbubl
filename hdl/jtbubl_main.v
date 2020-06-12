@@ -91,7 +91,7 @@ reg         main_work_cs, mcram_cs, // shared memories
             main2sub_nmi,
             misc_cs, sound_cs;
 reg         sub_work_cs;
-wire        sub_we, main_we, mcram_we, sub_int_n, mcu2main_int_n,
+wire        mcram_we, sub_int_n, mcu2main_int_n,
             mcu_vma;
 reg  [ 2:0] bank;
 reg         main_rst_n, sub_rst_n, mcu_rst;
@@ -120,9 +120,7 @@ assign      main_rom_addr = main_addr[15] ?
                         { { {1'b0, bank}+4'b10} , main_addr[13:0] } : // banked
                         { 3'd0, main_addr[14:0] }; // not banked
 assign      sub_rom_addr = sub_addr[14:0];
-assign      main_we      = main_work_cs && !main_wrn;
 assign      mcram_we     = mcram_cs && !main_wrn;
-assign      sub_we       = sub_work_cs && !sub_wrn && sub_rst_n;
 assign      cpu_addr     = main_addr[12:0];
 assign      cpu_dout     = main_dout;
 assign      cpu_rnw      = main_wrn;

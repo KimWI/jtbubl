@@ -80,10 +80,10 @@ wire [14:0] snd_addr, sub_addr;
 wire [11:0] mcu_addr;
 wire [17:0] main_addr;
 wire        cen12, cen6, cen4, cen3, prom_we;
-wire        snd_stb;
 
 wire [ 7:0] dipsw_a, dipsw_b;
 wire        LHBL, LVBL;
+wire        main_flag, main_stb, snd_stb;
 
 wire [12:0] cpu_addr;
 wire        vram_cs,  pal_cs;
