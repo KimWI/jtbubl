@@ -194,6 +194,7 @@ assign cpu_rnw = 1;
 assign vram_cs = 0;
 assign pal_cs  = 0;
 assign cpu_cen = 0;
+assign black_n = 1;
 `endif
 
 jtbubl_video u_video(
