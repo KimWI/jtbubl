@@ -413,8 +413,8 @@ always @(posedge clk24) begin
         case( mcu_bus[1:0] )
             2'd0: p3_in <= dipsw_a;
             2'd1: p3_in <= dipsw_b;
-            2'd2: p3_in <= {1'b1, start_button[0], joystick1[5:2], joystick1[0], joystick1[1] };
-            2'd3: p3_in <= {1'b1, start_button[1], joystick2[5:2], joystick2[0], joystick2[1] };
+            2'd2: p3_in <= {1'b1, start_button[0], joystick1[4], joystick1[5], joystick1[3:2], joystick1[0], joystick1[1] };
+            2'd3: p3_in <= {1'b1, start_button[1], joystick2[4], joystick2[5], joystick2[3:2], joystick2[0], joystick2[1] };
         endcase // mcu_bus[1:0]
     end
 end

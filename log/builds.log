@@ -72,3 +72,17 @@ bubl          	sidi	20200612	1	PASS	00720e1	496d88a
 bubl          	mister	20200612	1	PASS	00720e1	496d88a
 bubl          	mister	20200612	1	PASS	00720e1	496d88a
 bubl          	mister	20200612	1	FAIL	00720e1	496d88a
+bubl          	mister	20200612	1	PASS	679b65d	496d88a
+bubl          	mister	20200612	1	PASS	679b65d	496d88a
+bubl          	mist	20200612	1	PASS	679b65d	496d88a
+bubl          	mist	20200620	1	FAIL	679b65d	33db8bf
+bubl          	mist	20200620	1	FAIL	679b65d	33db8bf
+bubl          	mist	20200620	1	FAIL	679b65d	33db8bf
+bubl          	mist	20200620	1	PASS	679b65d	33db8bf
+bubl          	mist	20200620	1	PASS	679b65d	33db8bf
+bubl          	mist	20200620	1	PASS	679b65d	33db8bf
+bubl          	mister	20200620	1	PASS	679b65d	33db8bf
+bubl          	mist	20200621	1	PASS	679b65d	33db8bf
+bubl          	mist	20200621	1	PASS	679b65d	33db8bf
+bubl          	mist	20200621	1	PASS	679b65d	33db8bf
+bubl          	mist	20200621	1	PASS	679b65d	33db8bf

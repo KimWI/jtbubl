@@ -1,12 +1,10 @@
-# FPGA Clone of Early Arcade Games by Jose Tejada (aka jotego - @topapate)
+# FPGA Clone of Bubble Bobble Arcade Game by Jose Tejada (aka jotego - @topapate)
 
 You can show your appreciation through
 * Patreon: https://patreon.com/topapate
 * Paypal: https://paypal.me/topapate
 
-Yes, you always wanted to have a Ghosts'n Goblins arcade board at home. First you couldn't get it because your parents somehow did not understand you. Then you grow up and your wife doesn't understand you either. Don't worry, MiST(er) is here to the rescue.
-
-What you get with this is an extremely accurate (allegedly 100% accurate) clone of the original hardware. You will notice differences from MAME if you compare. For instance, on Ghosts'n Goblins try resetting it and compare those screens for a start! Original hardware handled sound and graphics in a different way from the emulator. There were delays in CPU bus access and other details that will make the experience different from an emulator.
+Yes, you always wanted to have a Bubble Bobble arcade board at home. First you couldn't get it because your parents somehow did not understand you. Then you grow up and your wife doesn't understand you either. Don't worry, MiST(er) is here to the rescue.
 
 I hope you will have as much fun with it as I had it while making it!
 
@@ -14,7 +12,7 @@ I hope you will have as much fun with it as I had it while making it!
 
 In chronological order:
 
- 1. 
+ 1. Bubble Bobble
 
 
 ## Keyboard
@@ -39,15 +37,11 @@ For MiST and MiSTer: games can be controlled with both game pads and keyboard. T
 
 # ROM Generation
 
-Each core in the releases folder continues files for linux and windows to generate the ROM file starting from a MAME set. Follow the instructions of that file. There are also MRA files available in the rom/mra folder. MRA files are the recommended way. Use the MRA-to-ROM converter from Sebdel if your device does not accept MRA files natively.
+Use the MRA files available in the rom/mra folder. MRA files are the recommended way. Use the MRA-to-ROM converter from Sebdel if your device does not accept MRA files natively.
 
 # SD Card
 
 For MiST copy the file core.rbf to the SD card at the root directory. Copy also the rom you have generated with the name JTGNG.rom. It will get loaded at start. Make sure to have a recent version of MiST/SiDi firmware.
-
-# Extras
-
-You can press F12 to bring the OSD menu up. You can turn off music, or sound effects with it. By default, a screen filter makes the screen look closer to an old tube monitor. If you turn it off you will get sharp pixels. Note that if you switch from sharp to soft pixels you will need a couple of seconds to get your eyes used as the brain initially perceives this as an out of focus image compared to the old one.
 
 # Modules
 
@@ -55,9 +49,8 @@ The FPGA clone uses the following modules:
 
 JT12: For YM2203 sound synthesis. From the same author.
 JTFRAME: A common framework for MiST(er) arcades. From the same author.
-MC6809 from Greg Miller
-T80: originally from Daniel Wallner, with edits from Alexey Melnikov (Mister)
-hybrid_pwm_sd.v copied from FPGAgen source code. Unknown author
+T80: originally from Daniel Wallner
+6801: unknown author
 
 Use `git clone --recurse-submodules` in order to get all submodules when you clone the repository.
 
@@ -78,11 +71,11 @@ Go to the root directory of the repository and execute: `source set_prj.sh`
 
 That will create an alias called jtcore to directory modules/jtframe/bin/jtcore. This is a command line utility that will compile the cores. Like
 
-`jtcore gng`
+`jtcore bubl`
 
 will compile Ghosts'n Goblins for MiST.
 
-`jtcore gng -mr`
+`jtcore bubl -mr`
 
 will compile it for MiSTer. And -sidi, will compile it for MiST. Support for Xilinx platforms is done by Neurorulez and is done through the GUI. Just check the files inside the cores folder for each game.
 
