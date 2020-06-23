@@ -146,7 +146,7 @@ jt49_dcrm2 #(.sw(10)) u_dcrm (
 );
 
 // Both FM chips have the same gain according to the schematics
-
+// YM2203 to YM3526 ratio = 8:1
 jt12_mixer #(.w0(16),.w1(16),.w2(10),.w3(8),.wout(16)) u_mixer(
     .clk    ( clk          ),
     .cen    ( cen3         ),
@@ -154,9 +154,9 @@ jt12_mixer #(.w0(16),.w1(16),.w2(10),.w3(8),.wout(16)) u_mixer(
     .ch1    ( fm1_snd      ),
     .ch2    ( psg2x        ),
     .ch3    ( 8'd0         ),
-    .gain0  ( 8'hFF        ),
-    .gain1  ( 8'h20        ),
-    .gain2  ( 8'h80        ),
+    .gain0  ( 8'hC0        ), // YM2203 - Fx
+    .gain1  ( 8'h18        ), // YM3526 - Music
+    .gain2  ( 8'h60        ), // PSG - Unused?
     .gain3  ( 8'd0         ),
     .mixed  ( snd          )
 );
