@@ -134,17 +134,19 @@ u_dwnld(
     .sdram_ack      ( sdram_ack     )
 );
 
-always @(posedge clk, posedge rst) begin
-    if( rst ) begin
-        `ifdef TOKIO
-        tokio <= 1; // set value in simulation
-        `else
-        tokio <= 0;
-        `endif
-    end else begin
-        if( ioctl_wr && ioctl_addr==25'd0 )
-            tokio <= ioctl_data==8'h7e; // single byte detection. Both tokyo and tokyob start like this
-    end
+`ifdef SIMULATION
+`ifndef LOADROM
+    `ifdef TOKIO
+    initial tokio=1;
+    `else
+    initial tokio=0;
+    `endif
+`endif
+`endif
+
+always @(posedge clk) begin
+    if( ioctl_wr && ioctl_addr==25'd0 )
+        tokio <= ioctl_data==8'h7e; // single byte detection. Both tokyo and tokyob start like this
 end
 
 `ifndef NOMAIN

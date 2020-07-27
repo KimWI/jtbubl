@@ -160,7 +160,7 @@ always @(*) begin
         flip_cs     = !main_mreq_n && main_addr[15: 8]==8'hFB && !main_addr[7] && !main_wrn;
         main2sub_nmi= !main_mreq_n && main_addr[15: 8]==8'hFB &&  main_addr[7] && !main_wrn;
         tres_cs     = !main_mreq_n && main_addr[15: 8]==8'hFA && !main_addr[7]; // watchdog
-        mcram_cs    = !main_mreq_n && main_addr[15: 9]==6'b1111_111; // FE
+        mcram_cs    = !main_mreq_n && main_addr[15: 9]==7'b1111_111; // FE
         cabinet_cs  = !main_mreq_n && main_addr[15: 7]==9'b1111_1010_0 && main_wrn;
     end else begin // Bubble Bobble
         sound_cs    = !main_mreq_n && main_addr[15: 8]==8'hFA && !main_addr[7];
