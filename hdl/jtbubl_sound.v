@@ -169,16 +169,20 @@ jt49_dcrm2 #(.sw(10)) u_dcrm (
 
 // Both FM chips have the same gain according to the schematics
 // YM2203 to YM3526 ratio = 8:1
-jt12_mixer #(.w0(16),.w1(16),.w2(10),.w3(8),.wout(16)) u_mixer(
+
+wire [7:0] fm0_gain = tokio ? 8'hC0 : 8'h80;
+wire [7:0] psg_gain = tokio ? 8'hFF : 8'h20;
+
+jt12_mixer #(.w0(16),.w1(16),.w2(11),.w3(8),.wout(16)) u_mixer(
     .clk    ( clk          ),
     .cen    ( cen3         ),
     .ch0    ( fm0_snd      ),
     .ch1    ( fm1_snd      ),
-    .ch2    ( psg2x        ),
+    .ch2    ( {psg2x,1'b0} ),
     .ch3    ( 8'd0         ),
-    .gain0  ( 8'h80        ), // YM2203 - Fx
+    .gain0  ( fm0_gain     ), // YM2203 - Fx
     .gain1  ( 8'h18        ), // YM3526 - Music
-    .gain2  ( 8'h40        ), // PSG - Unused?
+    .gain2  ( psg_gain     ), // PSG - Unused in Bubble Bobble - Used in Tokio
     .gain3  ( 8'd0         ),
     .mixed  ( snd          )
 );

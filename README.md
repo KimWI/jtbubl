@@ -12,8 +12,10 @@ I hope you will have as much fun with it as I had it while making it!
 
 In chronological order:
 
- 1. Bubble Bobble
+ 1. Tokio (Scrambled Formation)
+ 2. Bubble Bobble
 
+Note that Tokio hangs up after a life is lost if the RBF is compiled without sound.
 
 ## Test Screen
 
