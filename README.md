@@ -15,6 +15,26 @@ In chronological order:
  1. Bubble Bobble
 
 
+## Test Screen
+
+### Bubble Bobble
+
+Set mode to Japanese and test on to enter the test screen. Press 1P start to advance to the input and sound test screen.
+
+Sound codes for music
+
+Sound Code   | Music
+-------------|------------
+  7          | intro + main theme
+  8          | credits
+  9          | Super drunk
+ 10          | Bonus
+ 11          | Game over
+ 15          | hurry theme
+ 16          | Extend
+ 20          | Real ending
+
+
 ## Keyboard
 
 On MiSTer keyboard control is configured through the OSD.

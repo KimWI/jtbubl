@@ -59,7 +59,7 @@ module jtbubl_game(
     input           dip_pause,
     inout           dip_flip,
     input           dip_test,
-    input   [ 1:0]  dip_fxlevel, // Not a DIP on the original PCB   
+    input   [ 1:0]  dip_fxlevel, // Not a DIP on the original PCB
     // Sound output
     output  signed [15:0] snd,
     output          sample,
@@ -80,6 +80,7 @@ wire [14:0] snd_addr, sub_addr;
 wire [11:0] mcu_addr;
 wire [17:0] main_addr;
 wire        cen12, cen6, cen4, cen3, prom_we;
+reg         tokio;
 
 wire [ 7:0] dipsw_a, dipsw_b;
 wire        LHBL, LVBL;
@@ -133,6 +134,19 @@ u_dwnld(
     .sdram_ack      ( sdram_ack     )
 );
 
+always @(posedge clk, posedge rst) begin
+    if( rst ) begin
+        `ifdef TOKIO
+        tokio <= 1; // set value in simulation
+        `else
+        tokio <= 0;
+        `endif
+    end else begin
+        if( ioctl_wr && ioctl_addr==25'd0 )
+            tokio <= ioctl_data==8'h7e; // single byte detection. Both tokyo and tokyob start like this
+    end
+end
+
 `ifndef NOMAIN
 jtbubl_main u_main(
     .rst            ( rst           ),
@@ -141,11 +155,13 @@ jtbubl_main u_main(
     .cen6           ( cen6          ),
     .cen4           ( cen4          ),
     //.cpu_cen        ( cpu_cen       ),
+
+    .tokio          ( tokio         ),
     // Main CPU ROM
     .main_rom_addr  ( main_addr     ),
     .main_rom_cs    ( main_cs       ),
     .main_rom_ok    ( main_ok       ),
-    .main_rom_data  ( main_data     ),    
+    .main_rom_data  ( main_data     ),
     // Sub CPU ROM
     .sub_rom_addr   ( sub_addr      ),
     .sub_rom_cs     ( sub_cs        ),
@@ -188,7 +204,7 @@ jtbubl_main u_main(
     .dipsw_a        ( dipsw_a       ),
     .dipsw_b        ( dipsw_b       )
 );
-`else 
+`else
 assign main_cs = 0;
 assign cpu_rnw = 1;
 assign vram_cs = 0;
@@ -213,7 +229,7 @@ jtbubl_video u_video(
     // PROMs
     .prom_we        ( prom_we       ),
     .prog_addr      ( prog_addr[7:0]),
-    .prog_data      ( prog_data[3:0]),    
+    .prog_data      ( prog_data[3:0]),
     // GFX - CPU interface
     .vram_cs        ( vram_cs       ),
     .pal_cs         ( pal_cs        ),
@@ -244,6 +260,8 @@ jtbubl_sound u_sound(
     //.rstn       ( snd_rstn      ),
     .rstn       ( 1'b1          ),
     .cen3       ( cen3          ),
+
+    .tokio      ( tokio         ),
     // communication with main CPU
     .snd_latch  ( snd_latch     ),
     .main_latch ( main_latch    ),
@@ -261,7 +279,7 @@ jtbubl_sound u_sound(
     .snd        ( snd           ),
     .sample     ( sample        )
 );
-`else 
+`else
 assign snd_cs   = 0;
 assign snd_addr = 15'd0;
 assign snd      = 16'd0;
@@ -297,7 +315,7 @@ jtframe_rom #(
 
     .slot0_cs    ( main_cs       ),
     .slot1_cs    ( sub_cs        ),
-    .slot2_cs    ( mcu_cs        ), 
+    .slot2_cs    ( mcu_cs        ),
     .slot3_cs    ( snd_cs        ), // unused
     .slot4_cs    ( gfx_cs        ),
     .slot5_cs    ( 1'b0          ), // unused

@@ -21,10 +21,12 @@ module jtbubl_sound(
     input             rstn,   // from Main
     input             clk,
     input             cen3,   //  3   MHz
+
+    input             tokio,
     // Interface with main CPU
     input      [ 7:0] snd_latch,
     input             snd_stb,
-    output reg [ 7:0] main_latch,    
+    output reg [ 7:0] main_latch,
     output reg        main_stb,
     output            snd_flag,
     input             main_flag,
@@ -62,9 +64,15 @@ assign flag_clr   = (io_cs && !rd_n && A[1:0]==2'b0) || ~snd_rstn;
 always @(*) begin
     rom_cs = !mreq_n && !A[15];
     ram_cs = !mreq_n &&  A[15] && A[14:12]==3'b00;
-    fm0_cs = !mreq_n &&  A[15] && A[14:12]==3'b01;
-    fm1_cs = !mreq_n &&  A[15] && A[14:12]==3'b10;
-    io_cs  = !mreq_n &&  A[15] && A[14:12]==3'b11;
+    if( tokio ) begin
+        fm0_cs = !mreq_n && A[15:12]==4'b1011; // YM2203
+        fm1_cs = 0;
+        io_cs  = !mreq_n && (A[15:12]==4'b1001 || A[15:12]==4'b1010);
+    end else begin
+        fm0_cs = !mreq_n && A[15] && A[14:12]==3'b01; // YM2203
+        fm1_cs = !mreq_n && A[15] && A[14:12]==3'b10; // OPL
+        io_cs  = !mreq_n && A[15] && A[14:12]==3'b11;
+    end
 end
 
 always @(posedge clk) begin
@@ -72,8 +80,12 @@ always @(posedge clk) begin
         rom_cs:   din <= rom_data;
         fm0_cs:   din <= fm0_dout;
         fm1_cs:   din <= fm1_dout;
-        io_cs:    din <= A[1] ? 8'hff : (
-                         A[0] ? {6'h3f, main_stb, snd_flag} : snd_latch);
+        io_cs:    din <= tokio ? (
+                         !A[12] ? 8'hff :
+                         ( A[11] ? {6'h3f, main_stb, snd_flag} : snd_latch )
+                         ) : ( // Bubble Bobble:
+                         A[1] ? 8'hff : (
+                         A[0] ? {6'h3f, main_stb, snd_flag} : snd_latch));
         ram_cs:   din <= ram_dout;
         default:  din <= 8'hff;
     endcase
@@ -86,14 +98,24 @@ always @(posedge clk, negedge snd_rstn) begin
         nmi_en     <= 0;
     end else begin
         if( io_cs && !wr_n ) begin
-            case( A[1:0] )
-                2'd0: begin
-                    main_latch <= dout;
-                    main_stb   <= 1;
+            if( tokio ) begin
+                if( !A[12] ) begin // NMI control
+                    if(!A[11]) nmi_en <= 0;
+                    if( A[11]) nmi_en <= 1;
+                end else begin
+                    if(!A[11]) main_latch <= dout;
+                    if( A[11]) main_stb   <= 1;
                 end
-                2'd1: nmi_en     <= 1; // enables NMI
-                2'd2: nmi_en     <= 0;
-            endcase
+            end else begin
+                case( A[1:0] )
+                    2'd0: begin
+                        main_latch <= dout;
+                        main_stb   <= 1;
+                    end
+                    2'd1: nmi_en     <= 1; // enables NMI
+                    2'd2: nmi_en     <= 0;
+                endcase
+            end
         end else begin
             main_stb <= 0;
         end
@@ -154,9 +176,9 @@ jt12_mixer #(.w0(16),.w1(16),.w2(10),.w3(8),.wout(16)) u_mixer(
     .ch1    ( fm1_snd      ),
     .ch2    ( psg2x        ),
     .ch3    ( 8'd0         ),
-    .gain0  ( 8'hC0        ), // YM2203 - Fx
+    .gain0  ( 8'h80        ), // YM2203 - Fx
     .gain1  ( 8'h18        ), // YM3526 - Music
-    .gain2  ( 8'h60        ), // PSG - Unused?
+    .gain2  ( 8'h40        ), // PSG - Unused?
     .gain3  ( 8'd0         ),
     .mixed  ( snd          )
 );

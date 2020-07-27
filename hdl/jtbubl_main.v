@@ -23,6 +23,8 @@ module jtbubl_main(
     input               cen6,
     input               cen4,
 
+    // game selection
+    input               tokio,
     // Cabinet inputs
     input      [ 1:0]   start_button,
     input      [ 1:0]   coin_input,
@@ -80,6 +82,7 @@ wire [ 7:0] ram2main, ram2sub, main_dout, sub_dout,
             p1_in,
             p1_out, p2_out, p3_out, p4_out;
 reg  [ 7:0] p3_in, rammcu_din;
+reg  [ 7:0] cab_dout;
 reg         h1;
 wire [11:0] mcu_bus;
 wire [15:0] main_addr, sub_addr, mcu_addr;
@@ -89,9 +92,10 @@ reg         rammcu_we, rammcu_cs;
 reg         main_work_cs, mcram_cs, // shared memories
             tres_cs,  // watchdog reset
             main2sub_nmi,
-            misc_cs, sound_cs;
+            misc_cs, sound_cs,
+            cabinet_cs, flip_cs;
 reg         sub_work_cs;
-wire        mcram_we, sub_int_n, mcu2main_int_n,
+wire        mcram_we, sub_int_n, main_int_n,
             mcu_vma;
 reg  [ 2:0] bank;
 reg         main_rst_n, sub_rst_n, mcu_rst;
@@ -146,30 +150,41 @@ end
 
 // Main CPU address decoder
 always @(*) begin
-    main_rom_cs    = !main_mreq_n && (!main_addr[15] || main_addr[15:14]==2'b10);
-    vram_cs        = !main_mreq_n && main_addr[15:13]==3'b110;
-    main_work_cs   = !main_mreq_n && main_addr[15:13]==3'b111 && main_addr[12:11]!=2'b11;
-    pal_cs         = !main_mreq_n && main_addr[15: 9]==7'b1111_100;
-    sound_cs       = !main_mreq_n && main_addr[15: 8]==8'hFA && !main_addr[7];
-    tres_cs        = !main_mreq_n && main_addr[15: 8]==8'hFA && main_addr[7];
-    main2sub_nmi   = !main_mreq_n && main_addr[15: 8]==8'hFB && main_addr[7:6]==2'b00 && !main_wrn;
-    misc_cs        = !main_mreq_n && main_addr[15: 8]==8'hFB && main_addr[7:6]==2'b01 && !main_wrn;
-    mcram_cs       = !main_mreq_n && main_addr[15:10]==6'b1111_11;
+    main_rom_cs    = !main_mreq_n && (!main_addr[15] || main_addr[15:14]==2'b10); // 0000-7FFF and 8000-BFFF
+    vram_cs        = !main_mreq_n && main_addr[15:13]==3'b110; // C000-DCFF
+    main_work_cs   = !main_mreq_n && main_addr[15:13]==3'b111 && main_addr[12:11]!=2'b11; //E000-F7FF
+    pal_cs         = !main_mreq_n && main_addr[15: 9]==7'b1111_100; // F800-F9FF
+    if( tokio ) begin
+        sound_cs    = !main_mreq_n && main_addr[15: 8]==8'hFC && !main_addr[7];
+        misc_cs     = !main_mreq_n && main_addr[15: 8]==8'hFA &&  main_addr[7] && !main_wrn;
+        flip_cs     = !main_mreq_n && main_addr[15: 8]==8'hFB && !main_addr[7] && !main_wrn;
+        main2sub_nmi= !main_mreq_n && main_addr[15: 8]==8'hFB &&  main_addr[7] && !main_wrn;
+        tres_cs     = !main_mreq_n && main_addr[15: 8]==8'hFA && !main_addr[7]; // watchdog
+        mcram_cs    = !main_mreq_n && main_addr[15: 9]==6'b1111_111; // FE
+        cabinet_cs  = !main_mreq_n && main_addr[15: 7]==9'b1111_1010_0 && main_wrn;
+    end else begin // Bubble Bobble
+        sound_cs    = !main_mreq_n && main_addr[15: 8]==8'hFA && !main_addr[7];
+        misc_cs     = !main_mreq_n && main_addr[15: 8]==8'hFB && main_addr[7:6]==2'b01 && !main_wrn;
+        flip_cs     = 0; // misc_cs used instead
+        main2sub_nmi= !main_mreq_n && main_addr[15: 8]==8'hFB && main_addr[7:6]==2'b00 && !main_wrn;
+        tres_cs     = !main_mreq_n && main_addr[15: 8]==8'hFA && main_addr[7];
+        mcram_cs    = !main_mreq_n && main_addr[15:10]==6'b1111_11; // FC
+    end
 end
 
 // Main CPU input mux
 always @(posedge clk24) begin
-    main_din <= 
+    main_din <=
         main_rom_cs ? main_rom_data : (
         vram_cs     ? vram_dout     : (
         pal_cs      ? pal_dout      : (
         main_work_cs? work_dout     : (
-        mcram_cs    ? comm2main     : (
+        mcram_cs    ? (tokio ? 8'hbf : comm2main ) : (
         !main_iorq_n? int_vector    : (
         sound_cs    ? (
-            main_addr[0] ? { 6'h3f, main_flag, snd_flag } : main_latch )
-            : 8'hff
-        ))))));
+            main_addr[0] ? { 6'h3f, main_flag, snd_flag } : main_latch ) :(
+        cabinet_cs  ? cab_dout
+        : 8'hff )))))));
 end
 
 // Main CPU miscellaneous control bits
@@ -180,12 +195,20 @@ always @(posedge clk24 ) begin
         mcu_rst   <= 1;
         black_n   <= 0;
         flip      <= 0;
-    end else if(misc_cs) begin
-        bank      <= cpu_dout[2:0]^3'b100;
-        sub_rst_n <= cpu_dout[4];
-        mcu_rst   <= ~cpu_dout[5];
-        black_n   <= cpu_dout[6];
-        flip      <= cpu_dout[7];
+    end else begin
+        if(misc_cs) begin
+            bank      <= cpu_dout[2:0]^3'b100;
+            black_n   <= cpu_dout[6];
+            if(!tokio) begin
+                sub_rst_n <= cpu_dout[4];
+                mcu_rst   <= ~cpu_dout[5];
+            end else begin
+                sub_rst_n <= 1;
+                mcu_rst   <= 1;
+            end
+        end
+        if( tokio ? flip_cs : misc_cs )
+            flip <= cpu_dout[7];
     end
 end
 
@@ -220,7 +243,10 @@ jtframe_ff u_flag(
 // Sub CPU address decoder
 always @(*) begin
     sub_rom_cs     = !sub_mreq_n && !sub_addr[15];
-    sub_work_cs    = !sub_mreq_n &&  sub_addr[15:13]==3'b111;
+    if(tokio)
+        sub_work_cs    = !sub_mreq_n &&  sub_addr[15:13]==3'b100;
+    else // Bubble Bobble
+        sub_work_cs    = !sub_mreq_n &&  sub_addr[15:13]==3'b111;
 end
 
 // Sub CPU input mux
@@ -289,7 +315,7 @@ jtframe_z80 u_maincpu(
     .clk      ( clk24          ),
     .cen      ( cen6           ),
     .wait_n   ( main_wait_n    ),
-    .int_n    ( mcu2main_int_n ),
+    .int_n    ( main_int_n     ),
     .nmi_n    ( 1'b1           ),
     .busrq_n  ( 1'b1           ),
     .m1_n     (                ),
@@ -360,7 +386,7 @@ jtframe_ff u_subint(
     .qn     ( sub_int_n     ),
     .set    ( 1'b0          ),
     .clr    ( ~sub_iorq_n   ),
-    .sigedge( VBL_gated     ) 
+    .sigedge( VBL_gated     )
 );
 
 /////////////////////////////////////////
@@ -368,16 +394,16 @@ jtframe_ff u_subint(
 
 jtframe_ff u_mcu2main (
     .clk    ( clk24          ),
-    .rst    ( mcu_rst        ),
+    .rst    ( tokio ? ~main_rst_n : mcu_rst ),
     .cen    ( 1'b1           ),
     .din    ( 1'b1           ),
     .q      (                ),
-    .qn     ( mcu2main_int_n ),
+    .qn     ( main_int_n     ),
     .set    ( 1'b0           ),
     .clr    ( ~main_iorq_n   ),
     // This is a jumper on the schematics
     // it can come from P1[6] or from VBL
-    .sigedge( p1_out[6]      )
+    .sigedge( tokio ? VBL_gated : p1_out[6] )
 );
 
 always @(posedge clk24) begin
@@ -406,6 +432,7 @@ jtframe_ram #(.aw(10)) u_comm(
     .q      ( comm_dout        )
 );
 
+// Bubble Bobble handles the input ports via the MCU
 always @(posedge clk24) begin
     if( rammcu_cs )
         p3_in <= comm2mcu;
@@ -417,6 +444,18 @@ always @(posedge clk24) begin
             2'd3: p3_in <= {1'b1, start_button[1], joystick2[4], joystick2[5], joystick2[3:2], joystick2[0], joystick2[1] };
         endcase // mcu_bus[1:0]
     end
+end
+
+// This is used for Tokio
+always @(posedge clk24) begin
+    case( main_addr[2:0] )
+        3'd3: cab_dout <= dipsw_a;
+        3'd4: cab_dout <= dipsw_b;
+        3'd5: cab_dout <= {2'b11, 2'b11 /* MCU related */, coin_input, 2'b11 };
+        3'd6: cab_dout <= {1'b1, start_button[0], joystick1[4], joystick1[5], joystick1[3:2], joystick1[0], joystick1[1] };
+        3'd7: cab_dout <= {1'b1, start_button[1], joystick2[4], joystick2[5], joystick2[3:2], joystick2[0], joystick2[1] };
+        default: cab_dout <= 8'hff;
+    endcase
 end
 
 reg [3:0] clrcnt;
@@ -464,11 +503,11 @@ always @(posedge clk24) begin
             end else begin
                 rammcu_cs <= 0;
                 rammcu_we <= 0;
-            end   
+            end
         end else begin
             //rammcu_cs <= 0;
             rammcu_we <= 0;
-        end            
+        end
     end
 end
 
@@ -480,7 +519,7 @@ jtframe_6801mcu #(.MAXPORT(7)) u_mcu (
     .wrn        (               ),
     .vma        ( mcu_vma       ),
     .addr       ( mcu_addr      ),
-    .dout       (               ), 
+    .dout       (               ),
     .halt       ( 1'b0          ),
     .halted     (               ),
     .irq        ( mcuirq        ), // relies on sub CPU to clear it

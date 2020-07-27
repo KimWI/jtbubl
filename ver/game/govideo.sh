@@ -36,7 +36,7 @@ tail vram_odd.hex  -n  2048 > vram3.hex
 
 go.sh -d NOMAIN -d NOSOUND  -video 2 -w \
     -d SIMULATION_VTIMER \
-    $OTHER 
+    $OTHER || exit $?
 #-d GRAY
 #-d VIDEO_START=1
 
