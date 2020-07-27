@@ -197,7 +197,7 @@ always @(posedge clk24 ) begin
         flip      <= 0;
     end else begin
         if(misc_cs) begin
-            bank      <= cpu_dout[2:0]^3'b100;
+            bank      <= tokio ? cpu_dout[2:0] : (cpu_dout[2:0]^3'b100);
             black_n   <= cpu_dout[6];
             if(!tokio) begin
                 sub_rst_n <= cpu_dout[4];

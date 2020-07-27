@@ -20,9 +20,7 @@ done
 ARGS="$ARGS $TOKIO"
 
 # Mare SDRAM file
-if [ ! -s sdram.hex ]; then
-    bin2hex < ../../rom/${ROM}.rom > sdram.hex
-fi
+bin2hex < ../../rom/${ROM}.rom > sdram.hex
 
 # Find PROM file
 if [ ! -e a71-25.41 ]; then
