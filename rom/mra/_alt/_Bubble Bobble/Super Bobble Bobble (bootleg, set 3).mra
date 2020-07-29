@@ -21,16 +21,19 @@
 
 <misterromdescription>
     <about author="jotego" webpage="https://patreon.com/topapate" source="https://github.com/jotego" twitter="@topapate"/>
-    <name>bublboblr</name>
-    <setname>bublboblr</setname>
+    <name>Super Bobble Bobble (bootleg, set 3)</name>
+    <setname>sboblboblb</setname>
     <rbf>jtbubl</rbf>
-    <rom index="0" zip="bublboblr.zip|bublbobl.zip" type="merged" md5="None">
+    <rom index="0" zip="sboblboblb.zip|bublbobl.zip" type="merged" md5="None">
         <!-- maincpu - starts at 0x0 -->
         <interleave output="16">
-            <part name="a78-25.51" crc="2d901c9d" map="12"/>
+            <part name="bbb-3.rom" crc="f304152a" map="12"/>
         </interleave>
         <interleave output="16">
-            <part name="a78-24.52" crc="b7afedc4" map="12"/>
+            <part name="bb5" crc="13118eb1" map="12"/>
+        </interleave>
+        <interleave output="16">
+            <part name="bbb-4.rom" crc="94c75591" map="12"/>
         </interleave>
         <part repeat="0x10000">FF</part>
         <!-- subcpu - starts at 0x28000 -->
@@ -41,11 +44,7 @@
         <interleave output="16">
             <part name="a78-07.46" crc="4f9a26e8" map="12"/>
         </interleave>
-        <!-- mcu - starts at 0x38000 -->
-        <interleave output="16">
-            <part name="a78-01.17" crc="b1bfb53d" map="12"/>
-        </interleave>
-        <part repeat="0x7000">FF</part>
+        <part repeat="0x8000">FF</part>
         <!-- gfx1 - starts at 0x40000 -->
         <interleave output="16">
             <part name="a78-09.12" crc="20358c22" map="01"/>
@@ -76,20 +75,22 @@
         <part name="a71-25.41" crc="2d0f8545"/>
         <!-- Total 0xC0100 bytes - 768 kBytes -->
     </rom>
-    <rom index="1">00</rom>
+    <rom index="1">
+        <part>00</part>
+    </rom>
     <switches default="FF,FF" base="16">
         <!-- DSW0 -->
+        <dip name="Game" bits="0" ids="Super Bobble Bobble,Bobble Bobble"/>
         <dip name="Flip Screen" bits="1" ids="On,Off"/>
-        <dip name="Mode" bits="0" ids="Test /Pause,Test,Game, English,Game, Japanese"/>
+        <dip name="Service Mode" bits="2" ids="On,Off"/>
         <dip name="Demo Sounds" bits="3" ids="Off,On"/>
         <dip name="Coin A" bits="4,5" ids="2/3,2/1,1/2,1/1"/>
         <dip name="Coin B" bits="6,7" ids="2/3,2/1,1/2,1/1"/>
         <!-- DSW1 -->
         <dip name="Difficulty" bits="8,9" ids="Very Hard,Hard,Easy,Normal"/>
         <dip name="Bonus Life" bits="10,11" ids="50K 250K 500K,40K 200K 500K,20K 80K 300K,30K 100K 400K"/>
-        <dip name="Lives" bits="12,13" ids="2,1,5,3"/>
-        <dip name="Unknown" bits="14" ids="On,Off"/>
-        <dip name="ROM Type" bits="15" ids="IC52=256kb, IC53=256kb,IC52=512kb, IC53=none"/>
+        <dip name="Lives" bits="12,13" ids="2,1,100,3"/>
+        <dip name="Monster Speed" bits="14,15" ids="Normal,Medium,High,Very High"/>
     </switches>
-    <buttons names="Fire,Jump,Start,Coin,Pause" default="A,B,R,L,Start"/>
+    <buttons names="Shoot,Jump,Start,Coin,Pause" default="Y,X,R,L,Start"/>
 </misterromdescription>

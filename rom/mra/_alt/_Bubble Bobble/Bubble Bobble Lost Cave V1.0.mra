@@ -21,30 +21,31 @@
 
 <misterromdescription>
     <about author="jotego" webpage="https://patreon.com/topapate" source="https://github.com/jotego" twitter="@topapate"/>
-    <name>boblcave</name>
-    <setname>boblcave</setname>
+    <name>Bubble Bobble: Lost Cave V1.0</name>
+    <setname>bublcave10</setname>
     <rbf>jtbubl</rbf>
-    <rom index="0" zip="boblcave.zip|bublbobl.zip" type="merged" md5="None">
+    <rom index="0" zip="bublcave10.zip|bublbobl.zip" type="merged" md5="None">
         <!-- maincpu - starts at 0x0 -->
         <interleave output="16">
-            <part name="lc12_bb3" crc="dddc9a24" map="12"/>
+            <part name="bublcave10-06.51" crc="185cc219" map="12"/>
         </interleave>
         <interleave output="16">
-            <part name="lc12_bb5" crc="0bc4de52" map="12"/>
-        </interleave>
-        <interleave output="16">
-            <part name="lc12_bb4" crc="bd7afdf4" map="12"/>
+            <part name="bublcave10-05.52" crc="381cdde7" map="12"/>
         </interleave>
         <part repeat="0x10000">FF</part>
         <!-- subcpu - starts at 0x28000 -->
         <interleave output="16">
-            <part name="bublcave-08.37" crc="a9384086" map="12"/>
+            <part name="bublcave10-08.37" crc="026a68e1" map="12"/>
         </interleave>
         <!-- audiocpu - starts at 0x30000 -->
         <interleave output="16">
             <part name="a78-07.46" crc="4f9a26e8" map="12"/>
         </interleave>
-        <part repeat="0x8000">FF</part>
+        <!-- mcu - starts at 0x38000 -->
+        <interleave output="16">
+            <part name="a78-01.17" crc="b1bfb53d" map="12"/>
+        </interleave>
+        <part repeat="0x7000">FF</part>
         <!-- gfx1 - starts at 0x40000 -->
         <interleave output="16">
             <part name="bublcave-09.12" crc="b90b7eef" map="01"/>
@@ -75,11 +76,13 @@
         <part name="a71-25.41" crc="2d0f8545"/>
         <!-- Total 0xC0100 bytes - 768 kBytes -->
     </rom>
-    <rom index="1">00</rom>
+    <rom index="1">
+        <part>00</part>
+    </rom>
     <switches default="FF,FF" base="16">
         <!-- DSW0 -->
         <dip name="Flip Screen" bits="1" ids="On,Off"/>
-        <dip name="Mode" bits="0" ids="Test,Test,Game, English,Game, Japanese"/>
+        <dip name="Mode" bits="0" ids="Test /Pause,Test,Game, English,Game, Japanese"/>
         <dip name="Demo Sounds" bits="3" ids="Off,On"/>
         <dip name="Coin A" bits="4,5" ids="2/3,2/1,1/2,1/1"/>
         <dip name="Coin B" bits="6,7" ids="2/3,2/1,1/2,1/1"/>
@@ -90,5 +93,5 @@
         <dip name="Unknown" bits="14" ids="On,Off"/>
         <dip name="ROM Type" bits="15" ids="IC52=256kb, IC53=256kb,IC52=512kb, IC53=none"/>
     </switches>
-    <buttons names="Fire,Jump,Start,Coin,Pause" default="A,B,R,L,Start"/>
+    <buttons names="Shoot,Jump,Start,Coin,Pause" default="Y,X,R,L,Start"/>
 </misterromdescription>

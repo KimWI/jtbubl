@@ -21,19 +21,19 @@
 
 <misterromdescription>
     <about author="jotego" webpage="https://patreon.com/topapate" source="https://github.com/jotego" twitter="@topapate"/>
-    <name>bublboblb</name>
-    <setname>bublboblb</setname>
+    <name>Bubble Bobble ('bootleg redux' hack for Bobble Bobble PCB)</name>
+    <setname>bbredux</setname>
     <rbf>jtbubl</rbf>
-    <rom index="0" zip="bublboblb.zip|bublbobl.zip" type="merged" md5="None">
+    <rom index="0" zip="bbredux.zip|bublbobl.zip" type="merged" md5="None">
         <!-- maincpu - starts at 0x0 -->
         <interleave output="16">
-            <part name="bbaladar.3" crc="31bfc6fb" map="12"/>
+            <part name="redux_bb3" crc="d51de9f3" map="12"/>
         </interleave>
         <interleave output="16">
-            <part name="bbaladar.5" crc="16386e9a" map="12"/>
+            <part name="redux_bb5" crc="d29d3444" map="12"/>
         </interleave>
         <interleave output="16">
-            <part name="bbaladar.4" crc="0c4bcb07" map="12"/>
+            <part name="redux_bb4" crc="984149bd" map="12"/>
         </interleave>
         <part repeat="0x10000">FF</part>
         <!-- subcpu - starts at 0x28000 -->
@@ -75,7 +75,9 @@
         <part name="a71-25.41" crc="2d0f8545"/>
         <!-- Total 0xC0100 bytes - 768 kBytes -->
     </rom>
-    <rom index="1">00</rom>
+    <rom index="1">
+        <part>00</part>
+    </rom>
     <switches default="FF,FF" base="16">
         <!-- DSW0 -->
         <dip name="Flip Screen" bits="1" ids="On,Off"/>
@@ -87,8 +89,7 @@
         <dip name="Difficulty" bits="8,9" ids="Very Hard,Hard,Easy,Normal"/>
         <dip name="Bonus Life" bits="10,11" ids="50K 250K 500K,40K 200K 500K,20K 80K 300K,30K 100K 400K"/>
         <dip name="Lives" bits="12,13" ids="2,1,5,3"/>
-        <dip name="Unknown" bits="14" ids="On,Off"/>
-        <dip name="ROM Type" bits="15" ids="IC52=256kb, IC53=256kb,IC52=512kb, IC53=none"/>
+        <dip name="Monster Speed" bits="14,15" ids="Normal,Medium,High,Very High"/>
     </switches>
-    <buttons names="Fire,Jump,Start,Coin,Pause" default="A,B,R,L,Start"/>
+    <buttons names="Shoot,Jump,Start,Coin,Pause" default="Y,X,R,L,Start"/>
 </misterromdescription>

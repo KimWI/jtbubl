@@ -21,34 +21,31 @@
 
 <misterromdescription>
     <about author="jotego" webpage="https://patreon.com/topapate" source="https://github.com/jotego" twitter="@topapate"/>
-    <name>bub68705</name>
-    <setname>bub68705</setname>
+    <name>Bubble Bobble (US, Ver 5.1)</name>
+    <setname>bublboblr</setname>
     <rbf>jtbubl</rbf>
-    <rom index="0" zip="bub68705.zip|bublbobl.zip" type="merged" md5="None">
+    <rom index="0" zip="bublboblr.zip|bublbobl.zip" type="merged" md5="None">
         <!-- maincpu - starts at 0x0 -->
         <interleave output="16">
-            <part name="2.bin" crc="32c8305b" map="12"/>
+            <part name="a78-25.51" crc="2d901c9d" map="12"/>
         </interleave>
         <interleave output="16">
-            <part name="3-1.bin" crc="980c2615" map="12"/>
-        </interleave>
-        <interleave output="16">
-            <part name="3.bin" crc="e6c698f2" map="12"/>
+            <part name="a78-24.52" crc="b7afedc4" map="12"/>
         </interleave>
         <part repeat="0x10000">FF</part>
         <!-- subcpu - starts at 0x28000 -->
         <interleave output="16">
-            <part name="4.bin" crc="ae11a07b" map="12"/>
+            <part name="a78-08.37" crc="ae11a07b" map="12"/>
         </interleave>
         <!-- audiocpu - starts at 0x30000 -->
         <interleave output="16">
-            <part name="1.bin" crc="4f9a26e8" map="12"/>
+            <part name="a78-07.46" crc="4f9a26e8" map="12"/>
         </interleave>
         <!-- mcu - starts at 0x38000 -->
         <interleave output="16">
-            <part name="68705.bin" crc="78caa635" map="12"/>
+            <part name="a78-01.17" crc="b1bfb53d" map="12"/>
         </interleave>
-        <part repeat="0x7800">FF</part>
+        <part repeat="0x7000">FF</part>
         <!-- gfx1 - starts at 0x40000 -->
         <interleave output="16">
             <part name="a78-09.12" crc="20358c22" map="01"/>
@@ -79,7 +76,9 @@
         <part name="a71-25.41" crc="2d0f8545"/>
         <!-- Total 0xC0100 bytes - 768 kBytes -->
     </rom>
-    <rom index="1">00</rom>
+    <rom index="1">
+        <part>00</part>
+    </rom>
     <switches default="FF,FF" base="16">
         <!-- DSW0 -->
         <dip name="Flip Screen" bits="1" ids="On,Off"/>
@@ -94,5 +93,5 @@
         <dip name="Unknown" bits="14" ids="On,Off"/>
         <dip name="ROM Type" bits="15" ids="IC52=256kb, IC53=256kb,IC52=512kb, IC53=none"/>
     </switches>
-    <buttons names="Fire,Jump,Start,Coin,Pause" default="A,B,R,L,Start"/>
+    <buttons names="Shoot,Jump,Start,Coin,Pause" default="Y,X,R,L,Start"/>
 </misterromdescription>

@@ -21,16 +21,17 @@
 
 <misterromdescription>
     <about author="jotego" webpage="https://patreon.com/topapate" source="https://github.com/jotego" twitter="@topapate"/>
-    <name>tokioo</name>
-    <setname>tokioo</setname>
+    <name>Tokio / Scramble Formation (newer)
+        </name>
+    <setname>tokio</setname>
     <rbf>jtbubl</rbf>
-    <rom index="0" zip="tokioo.zip|tokio.zip" type="merged" md5="None">
+    <rom index="0" zip="tokio.zip" type="merged" md5="None">
         <!-- maincpu - starts at 0x0 -->
         <interleave output="16">
-            <part name="a71-02.ic4" crc="d556c908" map="12"/>
+            <part name="a71-02-1.ic4" crc="bb8dabd7" map="12"/>
         </interleave>
         <interleave output="16">
-            <part name="a71-03.ic5" crc="69dacf44" map="12"/>
+            <part name="a71-03-1.ic5" crc="ee49b383" map="12"/>
         </interleave>
         <interleave output="16">
             <part name="a71-04.ic6" crc="a0a4ce0e" map="12"/>
@@ -39,7 +40,7 @@
             <part name="a71-05.ic7" crc="6da0b945" map="12"/>
         </interleave>
         <interleave output="16">
-            <part name="a71-06.ic8" crc="447d6779" map="12"/>
+            <part name="a71-06-1.ic8" crc="56927b3f" map="12"/>
         </interleave>
         <!-- subcpu - starts at 0x28000 -->
         <interleave output="16">
@@ -90,7 +91,9 @@
         <!-- Total 0xC0100 bytes - 768 kBytes -->
     </rom>
     <!-- Vertical game -->
-    <rom index="1">01</rom>
+    <rom index="1">
+        <part>01</part>
+    </rom>
     <switches default="FF,FF" base="16">
         <!-- DSW0 -->
         <dip name="Cabinet" bits="0" ids="Upright,Cocktail"/>
@@ -107,5 +110,5 @@
         <dip name="Unused" bits="14" ids="On,Off"/>
         <dip name="Language" bits="15" ids="English,Japanese"/>
     </switches>
-    <buttons names="Fire,Jump,Start,Coin,Pause" default="A,B,R,L,Start"/>
+    <buttons names="Shoot,Formation,Start,Coin,Pause" default="Y,X,R,L,Start"/>
 </misterromdescription>

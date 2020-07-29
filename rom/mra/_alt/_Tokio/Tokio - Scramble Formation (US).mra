@@ -21,7 +21,8 @@
 
 <misterromdescription>
     <about author="jotego" webpage="https://patreon.com/topapate" source="https://github.com/jotego" twitter="@topapate"/>
-    <name>tokiou</name>
+    <name>Tokio / Scramble Formation (US)
+        </name>
     <setname>tokiou</setname>
     <rbf>jtbubl</rbf>
     <rom index="0" zip="tokiou.zip|tokio.zip" type="merged" md5="None">
@@ -90,7 +91,9 @@
         <!-- Total 0xC0100 bytes - 768 kBytes -->
     </rom>
     <!-- Vertical game -->
-    <rom index="1">01</rom>
+    <rom index="1">
+        <part>01</part>
+    </rom>
     <switches default="FF,FF" base="16">
         <!-- DSW0 -->
         <dip name="Cabinet" bits="0" ids="Upright,Cocktail"/>
@@ -107,5 +110,5 @@
         <dip name="Unused" bits="14" ids="On,Off"/>
         <dip name="Language" bits="15" ids="English,Japanese"/>
     </switches>
-    <buttons names="Fire,Jump,Start,Coin,Pause" default="A,B,R,L,Start"/>
+    <buttons names="Shoot,Formation,Start,Coin,Pause" default="Y,X,R,L,Start"/>
 </misterromdescription>

@@ -21,19 +21,19 @@
 
 <misterromdescription>
     <about author="jotego" webpage="https://patreon.com/topapate" source="https://github.com/jotego" twitter="@topapate"/>
-    <name>sboblbobl</name>
-    <setname>sboblbobl</setname>
+    <name>Bobble Bobble (bootleg of Bubble Bobble)</name>
+    <setname>boblbobl</setname>
     <rbf>jtbubl</rbf>
-    <rom index="0" zip="sboblbobl.zip|bublbobl.zip" type="merged" md5="None">
+    <rom index="0" zip="boblbobl.zip|bublbobl.zip" type="merged" md5="None">
         <!-- maincpu - starts at 0x0 -->
         <interleave output="16">
-            <part name="cpu2-3.bin" crc="2d9107b6" map="12"/>
+            <part name="bb3" crc="01f81936" map="12"/>
         </interleave>
         <interleave output="16">
             <part name="bb5" crc="13118eb1" map="12"/>
         </interleave>
         <interleave output="16">
-            <part name="cpu2-4.bin" crc="3f9fed10" map="12"/>
+            <part name="bb4" crc="afda99d8" map="12"/>
         </interleave>
         <part repeat="0x10000">FF</part>
         <!-- subcpu - starts at 0x28000 -->
@@ -47,12 +47,20 @@
         <part repeat="0x8000">FF</part>
         <!-- gfx1 - starts at 0x40000 -->
         <interleave output="16">
-            <part name="gfx11.bin" crc="76f2b367" map="01"/>
-            <part name="gfx8.bin" crc="677840e8" map="10"/>
+            <part name="a78-09.12" crc="20358c22" map="01"/>
+            <part name="a78-15.30" crc="6b61a413" map="10"/>
         </interleave>
         <interleave output="16">
-            <part name="gfx10.bin" crc="d370f499" map="01"/>
-            <part name="gfx7.bin" crc="702f61c0" map="10"/>
+            <part name="a78-10.13" crc="930168a9" map="01"/>
+            <part name="a78-16.31" crc="b5492d97" map="10"/>
+        </interleave>
+        <interleave output="16">
+            <part name="a78-11.14" crc="9773e512" map="01"/>
+            <part name="a78-17.32" crc="d69762d5" map="10"/>
+        </interleave>
+        <interleave output="16">
+            <part name="a78-12.15" crc="d045549b" map="01"/>
+            <part name="a78-18.33" crc="9f243b68" map="10"/>
         </interleave>
         <interleave output="16">
             <part name="a78-13.16" crc="d0af35c5" map="01"/>
@@ -67,20 +75,21 @@
         <part name="a71-25.41" crc="2d0f8545"/>
         <!-- Total 0xC0100 bytes - 768 kBytes -->
     </rom>
-    <rom index="1">00</rom>
+    <rom index="1">
+        <part>00</part>
+    </rom>
     <switches default="FF,FF" base="16">
         <!-- DSW0 -->
-        <dip name="Game" bits="0" ids="Super Bobble Bobble,Bobble Bobble"/>
         <dip name="Flip Screen" bits="1" ids="On,Off"/>
-        <dip name="Service Mode" bits="2" ids="On,Off"/>
+        <dip name="Mode" bits="0" ids="Test,Test,Game, English,Game, Japanese"/>
         <dip name="Demo Sounds" bits="3" ids="Off,On"/>
         <dip name="Coin A" bits="4,5" ids="2/3,2/1,1/2,1/1"/>
         <dip name="Coin B" bits="6,7" ids="2/3,2/1,1/2,1/1"/>
         <!-- DSW1 -->
         <dip name="Difficulty" bits="8,9" ids="Very Hard,Hard,Easy,Normal"/>
         <dip name="Bonus Life" bits="10,11" ids="50K 250K 500K,40K 200K 500K,20K 80K 300K,30K 100K 400K"/>
-        <dip name="Lives" bits="12,13" ids="2,1,100,3"/>
+        <dip name="Lives" bits="12,13" ids="2,1,5,3"/>
         <dip name="Monster Speed" bits="14,15" ids="Normal,Medium,High,Very High"/>
     </switches>
-    <buttons names="Fire,Jump,Start,Coin,Pause" default="A,B,R,L,Start"/>
+    <buttons names="Shoot,Jump,Start,Coin,Pause" default="Y,X,R,L,Start"/>
 </misterromdescription>
