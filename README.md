@@ -111,6 +111,30 @@ Jose Tejada Gomez. Twitter @topapate
 Project is hosted in http://www.github.com/jotego/jt_gng
 License: GPL3, you are obligued to publish your code if you use mine
 
+Thank you to June 2020 patrons for supporting this development and especially to:
+
+Alonso J. Núñez       Filip Kindt         Michael Fuerst
+Andrea Chiavazza      Francis B           Michael Yount
+Andreas Micklei       Frank Hoedemakers   Mike Jegenjan
+Andrew Boudreau       Gavin               Mike Parks
+Andy Palmer           Greg                Nailbomb
+Angelo Kanaris        Gregory Val         natalie
+Anthony Monaco        HFSPlay             Neil St Clair
+atrac17               Human0Target        Nico Stamp
+Ben Toman             hyp36rmax           Paweł Mandes
+Bob G                 Jesse Clark         Richard Eng
+Brent Fraser W.       Johan Smolinski     Richard Murillo
+Carrboroman           Justin D'Arcangelo  SNIPERMikeUK
+Clinton Cronin        Keith Duncan        Spank Minister
+Daniel Estreito       KnC                 Stephen Goldberg
+Darren Wootton        Lee Osborne         Steven Yedwab
+David Fleetwood       Luc JOLY            taal.M
+David Jones           Magnus Kvevlander   Thomas Irwin
+DrMnike               Matthew Woodford    Trifle
+Eric J Faulkes        M. Penkert-Hennig   VickiViperZabel
+Fabio Michelin        Michael Deshaies    Victor Bly
+                           XC-3730C
+
 
 Thank you all!
 ```
